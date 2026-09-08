@@ -1,0 +1,336 @@
+//
+//  CompareView.swift
+//  LearningSpeakingEnglish
+//
+//  Created by Arif Fathurrahman on 18/04/26.
+//
+
+import SwiftUI
+
+struct CompareView: View {
+    @Binding var session: LearningSession
+    @Environment(\.dismiss) private var dismiss
+    var onFlowFinished: (() -> Void)? = nil
+    @State private var canAnalyzeSpeech = false
+    @State private var wordResult = PronunciationResult()
+    @State private var sentence1Result = PronunciationResult()
+    @State private var sentence2Result = PronunciationResult()
+    @State private var isAnalyzingWord = false
+    @State private var isAnalyzingSentence1 = false
+    @State private var isAnalyzingSentence2 = false
+
+    private var currentWord: String {
+        session.currentVocab?.nameEN ?? "Vocabulary"
+    }
+
+    private var currentSentence: String {
+        session.currentExamples.first?.exampleEN ?? "No sentence available."
+    }
+
+    private var secondSentence: String {
+        let examples = session.currentExamples
+        guard examples.indices.contains(1) else {
+            return "No second sentence available."
+        }
+        return examples[1].exampleEN
+    }
+
+    var body: some View {
+        ZStack {
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 16) {
+                    compareHeader
+                    CompareSection(
+                        title: "Word",
+                        content: currentWord,
+                        sourceLabel: "Reference",
+                        attemptLabel: "Your attempt",
+                        score: wordResult.score,
+                        recognizedText: wordResult.recognizedText,
+                        isAnalyzing: isAnalyzingWord,
+                        onPlayReference: {
+                            SpeechHelper.speak(currentWord, languageCode: "en-US")
+                        },
+                        onPlayAttempt: {
+                            if let url = session.recordingURL(forStep: 1) {
+                                RecordingPlaybackHelper.play(url: url)
+                            } else {
+                                SpeechHelper.speak(currentWord, languageCode: "en-US")
+                            }
+                        },
+                        onCheck: {
+                            analyzeStep(step: 1, targetText: currentWord)
+                        }
+                    )
+                    CompareSection(
+                        title: "Sentence 1",
+                        content: currentSentence,
+                        sourceLabel: "Reference",
+                        attemptLabel: "Your attempt",
+                        score: sentence1Result.score,
+                        recognizedText: sentence1Result.recognizedText,
+                        isAnalyzing: isAnalyzingSentence1,
+                        onPlayReference: {
+                            SpeechHelper.speak(currentSentence, languageCode: "en-US")
+                        },
+                        onPlayAttempt: {
+                            if let url = session.recordingURL(forStep: 2) {
+                                RecordingPlaybackHelper.play(url: url)
+                            } else {
+                                SpeechHelper.speak(currentSentence, languageCode: "en-US")
+                            }
+                        },
+                        onCheck: {
+                            analyzeStep(step: 2, targetText: currentSentence)
+                        }
+                    )
+                    CompareSection(
+                        title: "Sentence 2",
+                        content: secondSentence,
+                        sourceLabel: "Reference",
+                        attemptLabel: "Your attempt",
+                        score: sentence2Result.score,
+                        recognizedText: sentence2Result.recognizedText,
+                        isAnalyzing: isAnalyzingSentence2,
+                        onPlayReference: {
+                            SpeechHelper.speak(secondSentence, languageCode: "en-US")
+                        },
+                        onPlayAttempt: {
+                            if let url = session.recordingURL(forStep: 3) {
+                                RecordingPlaybackHelper.play(url: url)
+                            } else {
+                                SpeechHelper.speak(secondSentence, languageCode: "en-US")
+                            }
+                        },
+                        onCheck: {
+                            analyzeStep(step: 3, targetText: secondSentence)
+                        }
+                    )
+                    Spacer(minLength: 8)
+                    
+                    Button {
+                        session.finishCurrentLearning()
+                        if let onFlowFinished {
+                            onFlowFinished()
+                        } else {
+                            dismiss()
+                        }
+                    } label: {
+                        Text("Finish")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.appPrimary)
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                    }
+                }
+                .padding(20)
+            }
+        }
+        .navigationTitle("Let's Compare")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            requestSpeechPermissionAndAnalyze()
+        }
+    }
+    private var compareHeader: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "waveform.path.ecg")
+                .font(.headline)
+                .foregroundStyle(Color.appSecondary)
+                .frame(width: 36, height: 36)
+                .background(Color.appSecondary.opacity(0.12))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Final check")
+                    .font(.headline)
+                Text("Listen and compare before you finish")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+    }
+
+    private func requestSpeechPermissionAndAnalyze() {
+        PronunciationHelper.requestSpeechPermission { granted in
+            canAnalyzeSpeech = granted
+            if granted {
+                analyzeAllStepsSequentially()
+            }
+        }
+    }
+
+    private func analyzeAllStepsSequentially() {
+        let steps: [(Int, String)] = [
+            (1, currentWord),
+            (2, currentSentence),
+            (3, secondSentence)
+        ]
+        analyzeSequentially(steps: steps, index: 0)
+    }
+
+    private func analyzeSequentially(steps: [(Int, String)], index: Int) {
+        guard index < steps.count else { return }
+        let step = steps[index]
+        analyzeStep(step: step.0, targetText: step.1) {
+            analyzeSequentially(steps: steps, index: index + 1)
+        }
+    }
+
+    private func analyzeStep(step: Int, targetText: String, onFinished: (() -> Void)? = nil) {
+        guard canAnalyzeSpeech else {
+            onFinished?()
+            return
+        }
+        guard let url = session.recordingURL(forStep: step) else {
+            onFinished?()
+            return
+        }
+
+        setAnalyzing(step: step, value: true)
+        PronunciationHelper.analyze(from: url, targetText: targetText) { result in
+            setResult(step: step, result: result)
+            setAnalyzing(step: step, value: false)
+            onFinished?()
+        }
+    }
+
+    private func setAnalyzing(step: Int, value: Bool) {
+        if step == 1 {
+            isAnalyzingWord = value
+        } else if step == 2 {
+            isAnalyzingSentence1 = value
+        } else if step == 3 {
+            isAnalyzingSentence2 = value
+        }
+    }
+
+    private func setResult(step: Int, result: PronunciationResult) {
+        if step == 1 {
+            wordResult = result
+        } else if step == 2 {
+            sentence1Result = result
+        } else if step == 3 {
+            sentence2Result = result
+        }
+    }
+}
+
+struct CompareSection: View {
+    var title: String
+    var content: String
+    var sourceLabel: String
+    var attemptLabel: String
+    var score: PronunciationScore
+    var recognizedText: String
+    var isAnalyzing: Bool
+    var onPlayReference: () -> Void = {}
+    var onPlayAttempt: () -> Void = {}
+    var onCheck: () -> Void = {}
+    
+    var body: some View {
+        VStack(spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//                .fixedSize(horizontal: false, vertical: true)
+
+                Text(content)
+                .font(.title3.weight(.semibold))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: 10) {
+                Button {
+                    onPlayReference()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "play.fill")
+                        Text(sourceLabel)
+                    }
+                    .fontWeight(.medium)
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 14)
+                    .frame(height: 44)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(Capsule())
+                    .foregroundStyle(Color.appPrimary)
+                }
+                Button {
+                    onPlayAttempt()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "waveform")
+                        Text(attemptLabel)
+                    }
+                    .fontWeight(.medium)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .background(Color.appPrimary)
+                    .clipShape(Capsule())
+                }
+
+//                Image(systemName: "checkmark.circle.fill")
+//                    .font(.title3)
+//                    .foregroundStyle(Color.appPrimary)
+//                    .frame(width: 44, height: 44)
+            }
+
+            HStack {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(score.color)
+                        .frame(width: 8, height: 8)
+                    Text(score.title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(score.color)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(score.color.opacity(0.12))
+                .clipShape(Capsule())
+
+                Spacer()
+
+                Button(isAnalyzing ? "Checking..." : "Check Pronunciation") {
+                    if !isAnalyzing {
+                        onCheck()
+                    }
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .disabled(isAnalyzing)
+            }
+
+            if !recognizedText.isEmpty {
+                Text("Detected: \(recognizedText)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+#Preview{
+    NavigationStack {
+        CompareView(session: .constant(LearningSession.placeholder(dailyGoal: 3)))
+    }
+}
+
