@@ -20,7 +20,9 @@ struct LearnVocabView: View {
     @State private var justRecordedURL: URL?
     @State private var isCheckingPronunciation = false
     @State private var pronunciationResult = PronunciationResult()
+    @State private var pronunciationError: String?
     @State private var showExitAlert = false
+    @State private var assessmentTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
@@ -182,6 +184,18 @@ struct LearnVocabView: View {
                 .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled(true)
         }
+        .alert("Pronunciation check failed", isPresented: Binding(
+            get: { pronunciationError != nil },
+            set: { if !$0 { pronunciationError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(pronunciationError ?? "Please try recording again.")
+        }
+        .onDisappear {
+            assessmentTask?.cancel()
+            isCheckingPronunciation = false
+        }
     }
 
     private func startRecording() {
@@ -189,7 +203,7 @@ struct LearnVocabView: View {
             guard granted else { return }
 
             do {
-                let fileName = "vocab-\(UUID().uuidString).m4a"
+                let fileName = "vocab-\(UUID().uuidString).wav"
                 let newRecorder = try RecordingHelper.makeRecorder(fileName: fileName)
                 recorder = newRecorder
                 recordingSeconds = 0
@@ -227,19 +241,26 @@ struct LearnVocabView: View {
 
     private func analyzePronunciation(fileURL: URL) {
         pronunciationResult = PronunciationResult()
+        pronunciationError = nil
         isCheckingPronunciation = true
 
         let targetWord = session.currentVocab?.nameEN ?? ""
-        PronunciationHelper.requestSpeechPermission { granted in
-            guard granted else {
-                isCheckingPronunciation = false
-                return
+        assessmentTask?.cancel()
+        assessmentTask = Task { @MainActor in
+            do {
+                guard let service = PronunciationService.configured else {
+                    throw PronunciationServiceError.missingConfiguration
+                }
+                pronunciationResult = try await service.assess(fileURL: fileURL, referenceText: targetWord)
+                session.savePronunciationResult(forStep: 1, result: pronunciationResult)
+            } catch {
+                if Task.isCancelled { return }
+                pronunciationResult = PronunciationResult()
+                pronunciationError = error.localizedDescription
+                print("Azure pronunciation assessment failed: \(error)")
             }
-
-            PronunciationHelper.analyze(from: fileURL, targetText: targetWord) { result in
-                pronunciationResult = result
-                isCheckingPronunciation = false
-            }
+            isCheckingPronunciation = false
+            assessmentTask = nil
         }
     }
 
@@ -259,7 +280,7 @@ struct LearnVocabView: View {
                     ProgressView()
                         .controlSize(.small)
                 } else {
-                    Text(pronunciationResult.score.title)
+                    Text(pronunciationResult.score.title + (pronunciationResult.percentage.map { " · PronScore: \(Int($0.rounded()))/100" } ?? ""))
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(pronunciationResult.score.color)
                         .padding(.horizontal, 12)

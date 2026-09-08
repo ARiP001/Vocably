@@ -11,13 +11,9 @@ struct CompareView: View {
     @Binding var session: LearningSession
     @Environment(\.dismiss) private var dismiss
     var onFlowFinished: (() -> Void)? = nil
-    @State private var canAnalyzeSpeech = false
     @State private var wordResult = PronunciationResult()
     @State private var sentence1Result = PronunciationResult()
     @State private var sentence2Result = PronunciationResult()
-    @State private var isAnalyzingWord = false
-    @State private var isAnalyzingSentence1 = false
-    @State private var isAnalyzingSentence2 = false
 
     private var currentWord: String {
         session.currentVocab?.nameEN ?? "Vocabulary"
@@ -49,8 +45,9 @@ struct CompareView: View {
                         sourceLabel: "Reference",
                         attemptLabel: "Your attempt",
                         score: wordResult.score,
+                        percentage: wordResult.percentage,
                         recognizedText: wordResult.recognizedText,
-                        isAnalyzing: isAnalyzingWord,
+                        isAnalyzing: false,
                         onPlayReference: {
                             SpeechHelper.speak(currentWord, languageCode: "en-US")
                         },
@@ -61,9 +58,6 @@ struct CompareView: View {
                                 SpeechHelper.speak(currentWord, languageCode: "en-US")
                             }
                         },
-                        onCheck: {
-                            analyzeStep(step: 1, targetText: currentWord)
-                        }
                     )
                     CompareSection(
                         title: "Sentence 1",
@@ -71,8 +65,9 @@ struct CompareView: View {
                         sourceLabel: "Reference",
                         attemptLabel: "Your attempt",
                         score: sentence1Result.score,
+                        percentage: sentence1Result.percentage,
                         recognizedText: sentence1Result.recognizedText,
-                        isAnalyzing: isAnalyzingSentence1,
+                        isAnalyzing: false,
                         onPlayReference: {
                             SpeechHelper.speak(currentSentence, languageCode: "en-US")
                         },
@@ -83,9 +78,6 @@ struct CompareView: View {
                                 SpeechHelper.speak(currentSentence, languageCode: "en-US")
                             }
                         },
-                        onCheck: {
-                            analyzeStep(step: 2, targetText: currentSentence)
-                        }
                     )
                     CompareSection(
                         title: "Sentence 2",
@@ -93,8 +85,9 @@ struct CompareView: View {
                         sourceLabel: "Reference",
                         attemptLabel: "Your attempt",
                         score: sentence2Result.score,
+                        percentage: sentence2Result.percentage,
                         recognizedText: sentence2Result.recognizedText,
-                        isAnalyzing: isAnalyzingSentence2,
+                        isAnalyzing: false,
                         onPlayReference: {
                             SpeechHelper.speak(secondSentence, languageCode: "en-US")
                         },
@@ -105,9 +98,6 @@ struct CompareView: View {
                                 SpeechHelper.speak(secondSentence, languageCode: "en-US")
                             }
                         },
-                        onCheck: {
-                            analyzeStep(step: 3, targetText: secondSentence)
-                        }
                     )
                     Spacer(minLength: 8)
                     
@@ -134,7 +124,9 @@ struct CompareView: View {
         .navigationTitle("Let's Compare")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            requestSpeechPermissionAndAnalyze()
+            wordResult = session.pronunciationResult(forStep: 1)
+            sentence1Result = session.pronunciationResult(forStep: 2)
+            sentence2Result = session.pronunciationResult(forStep: 3)
         }
     }
     private var compareHeader: some View {
@@ -161,69 +153,6 @@ struct CompareView: View {
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
-    private func requestSpeechPermissionAndAnalyze() {
-        PronunciationHelper.requestSpeechPermission { granted in
-            canAnalyzeSpeech = granted
-            if granted {
-                analyzeAllStepsSequentially()
-            }
-        }
-    }
-
-    private func analyzeAllStepsSequentially() {
-        let steps: [(Int, String)] = [
-            (1, currentWord),
-            (2, currentSentence),
-            (3, secondSentence)
-        ]
-        analyzeSequentially(steps: steps, index: 0)
-    }
-
-    private func analyzeSequentially(steps: [(Int, String)], index: Int) {
-        guard index < steps.count else { return }
-        let step = steps[index]
-        analyzeStep(step: step.0, targetText: step.1) {
-            analyzeSequentially(steps: steps, index: index + 1)
-        }
-    }
-
-    private func analyzeStep(step: Int, targetText: String, onFinished: (() -> Void)? = nil) {
-        guard canAnalyzeSpeech else {
-            onFinished?()
-            return
-        }
-        guard let url = session.recordingURL(forStep: step) else {
-            onFinished?()
-            return
-        }
-
-        setAnalyzing(step: step, value: true)
-        PronunciationHelper.analyze(from: url, targetText: targetText) { result in
-            setResult(step: step, result: result)
-            setAnalyzing(step: step, value: false)
-            onFinished?()
-        }
-    }
-
-    private func setAnalyzing(step: Int, value: Bool) {
-        if step == 1 {
-            isAnalyzingWord = value
-        } else if step == 2 {
-            isAnalyzingSentence1 = value
-        } else if step == 3 {
-            isAnalyzingSentence2 = value
-        }
-    }
-
-    private func setResult(step: Int, result: PronunciationResult) {
-        if step == 1 {
-            wordResult = result
-        } else if step == 2 {
-            sentence1Result = result
-        } else if step == 3 {
-            sentence2Result = result
-        }
-    }
 }
 
 struct CompareSection: View {
@@ -232,11 +161,11 @@ struct CompareSection: View {
     var sourceLabel: String
     var attemptLabel: String
     var score: PronunciationScore
+    var percentage: Double?
     var recognizedText: String
     var isAnalyzing: Bool
     var onPlayReference: () -> Void = {}
     var onPlayAttempt: () -> Void = {}
-    var onCheck: () -> Void = {}
     
     var body: some View {
         VStack(spacing: 14) {
@@ -294,7 +223,7 @@ struct CompareSection: View {
                     Circle()
                         .fill(score.color)
                         .frame(width: 8, height: 8)
-                    Text(score.title)
+                    Text(score.title + (percentage.map { " · PronScore: \(Int($0.rounded()))/100" } ?? ""))
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(score.color)
                 }
@@ -305,14 +234,9 @@ struct CompareSection: View {
 
                 Spacer()
 
-                Button(isAnalyzing ? "Checking..." : "Check Pronunciation") {
-                    if !isAnalyzing {
-                        onCheck()
-                    }
-                }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .disabled(isAnalyzing)
+                Text(isAnalyzing ? "Checking..." : (percentage == nil ? "Not checked" : "Already checked"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
             }
 
             if !recognizedText.isEmpty {
@@ -333,4 +257,3 @@ struct CompareSection: View {
         CompareView(session: .constant(LearningSession.placeholder(dailyGoal: 3)))
     }
 }
-

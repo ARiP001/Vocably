@@ -17,9 +17,9 @@ enum PronunciationScore {
     var title: String {
         switch self {
         case .perfect:
-            return "Great"
+            return "Greatcok"
         case .almost:
-            return "Almost"
+            return "Almostcok"
         case .keepTrying:
             return "Keep trying"
         case .unrecognized:
@@ -44,6 +44,24 @@ enum PronunciationScore {
 struct PronunciationResult {
     var recognizedText: String = ""
     var score: PronunciationScore = .unrecognized
+    /// Overall Azure HundredMark score (0...100).
+    var percentage: Double?
+    /// Scores returned for each recognized word, in spoken order.
+    var words: [PronunciationWordResult] = []
+}
+
+struct PronunciationWordResult: Identifiable {
+    let id = UUID()
+    let word: String
+    let score: Double
+
+    var color: Color {
+        switch score {
+        case 80...: return .green
+        case 60..<80: return .yellow
+        default: return .red
+        }
+    }
 }
 
 /// Stores recording URLs for the 3 learning steps of one vocab.
@@ -130,6 +148,7 @@ struct LearningSession {
     var currentIndex: Int = 0
     var learnedVocabIDs: [UUID] = []
     var recordingsByVocabID: [UUID: LearningRecording] = [:]
+    var pronunciationResultsByVocabID: [UUID: [Int: PronunciationResult]] = [:]
 
     /// Safe daily target, clamped to available vocab count.
     var dailyTargetCount: Int {
@@ -197,6 +216,13 @@ struct LearningSession {
             learnedVocabIDs.append(currentID)
         }
 
+        if let recording = recordingsByVocabID.removeValue(forKey: currentID) {
+            [recording.vocabURL, recording.sentence1URL, recording.sentence2URL]
+                .compactMap { $0 }
+                .forEach { try? FileManager.default.removeItem(at: $0) }
+        }
+        pronunciationResultsByVocabID.removeValue(forKey: currentID)
+
         moveToNextUnlearnedVocab()
     }
 
@@ -229,6 +255,19 @@ struct LearningSession {
         }
 
         recordingsByVocabID[currentID] = recording
+    }
+
+    mutating func savePronunciationResult(forStep step: Int, result: PronunciationResult) {
+        guard !vocabList.isEmpty else { return }
+        let currentID = vocabList[currentIndex].id
+        var results = pronunciationResultsByVocabID[currentID] ?? [:]
+        results[step] = result
+        pronunciationResultsByVocabID[currentID] = results
+    }
+
+    func pronunciationResult(forStep step: Int) -> PronunciationResult {
+        guard !vocabList.isEmpty else { return PronunciationResult() }
+        return pronunciationResultsByVocabID[vocabList[currentIndex].id]?[step] ?? PronunciationResult()
     }
 
     /// Reads stored recording URL for a specific step of current vocab.
@@ -279,9 +318,10 @@ struct LearningSession {
 
 extension LearningSession {
     /// Creates in-memory session data from placeholder database.
+    @MainActor
     static func placeholder(dailyGoal: Int, interest: String = "General") -> LearningSession {
         let vocabulary = VocabularyData.load().map(Vocab.init(recommendedVocabulary:))
-        LearningSession(
+        return LearningSession(
             dailyGoal: max(1, dailyGoal),
             vocabList: vocabulary,
             selectedInterest: interest

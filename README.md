@@ -89,7 +89,7 @@ flowchart TD
 
 ## Pronunciation feedback
 
-Speech recognition is handled by `PronunciationHelper` with an `en-US` recognizer. The app attempts on-device recognition when the device supports it and cancels a stalled recognition request after eight seconds.
+Word and sentence learning now sends 16 kHz mono PCM WAV recordings to Azure Speech Pronunciation Assessment through `PronunciationService`. The Azure region and subscription key are read from `Config.xcconfig` through generated Info.plist values. The legacy Compare screen still uses the local `PronunciationHelper` path until it is migrated.
 
 This is text matching, not acoustic pronunciation scoring. The transcribed text and the expected text are normalized by lowercasing and trimming outer whitespace/punctuation, then classified as:
 

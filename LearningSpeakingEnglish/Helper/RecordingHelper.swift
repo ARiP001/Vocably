@@ -24,16 +24,18 @@ enum RecordingHelper {
         }
     }
 
-    /// Creates and configures a recorder that writes to Documents folder.
+    /// Creates a 16 kHz mono PCM WAV recorder for pronunciation assessment.
     static func makeRecorder(fileName: String) throws -> AVAudioRecorder {
         let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let fileURL = folder.appendingPathComponent(fileName)
 
         let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 12_000,
+            AVFormatIDKey: Int(kAudioFormatLinearPCM),
+            AVSampleRateKey: 16_000,
             AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsFloatKey: false,
+            AVLinearPCMIsBigEndianKey: false
         ]
 
         let session = AVAudioSession.sharedInstance()

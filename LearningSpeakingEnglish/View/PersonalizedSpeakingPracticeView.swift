@@ -22,6 +22,8 @@ struct PersonalizedSpeakingPracticeView: View {
     @State private var showRecordingSheet = false
     @State private var isChecking = false
     @State private var showSummary = false
+    @State private var pronunciationError: String?
+    @State private var assessmentTask: Task<Void, Never>?
 
     private var prompts: [String] {
         let fallbacks = ["Practice the word in a sentence.", "Repeat the word naturally."]
@@ -54,6 +56,18 @@ struct PersonalizedSpeakingPracticeView: View {
             .presentationDragIndicator(.visible)
             .interactiveDismissDisabled(true)
         }
+        .alert("Pronunciation check failed", isPresented: Binding(
+            get: { pronunciationError != nil },
+            set: { if !$0 { pronunciationError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(pronunciationError ?? "Please try recording again.")
+        }
+        .onDisappear {
+            assessmentTask?.cancel()
+            isChecking = false
+        }
     }
 
     private var exerciseView: some View {
@@ -65,7 +79,7 @@ struct PersonalizedSpeakingPracticeView: View {
                 Text(currentStep == 0 ? "Say this word clearly" : "Practice this sentence")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
-                Text(currentPrompt)
+                coloredPromptText(prompt: currentPrompt, result: results[currentStep])
                     .font(currentStep == 0 ? .system(size: 40, weight: .bold) : .title2.weight(.semibold))
                     .multilineTextAlignment(.center)
                 Button {
@@ -145,7 +159,7 @@ struct PersonalizedSpeakingPracticeView: View {
                 if isChecking {
                     ProgressView().controlSize(.small)
                 } else {
-                    Text(results[currentStep].score.title)
+                    Text(scoreLabel(for: results[currentStep]))
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(results[currentStep].score.color)
                 }
@@ -174,7 +188,7 @@ struct PersonalizedSpeakingPracticeView: View {
                         Text(index == 0 ? "Word" : "Sentence \(index)")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
-                        Text(prompts[index])
+                        coloredPromptText(prompt: prompts[index], result: results[index])
                             .font(.headline)
                         HStack {
                             Button("Reference") { SpeechHelper.speak(prompts[index]) }
@@ -184,7 +198,7 @@ struct PersonalizedSpeakingPracticeView: View {
                             }
                         }
                         .foregroundStyle(Color.appPrimary)
-                        Text(results[index].score.title)
+                        Text(scoreLabel(for: results[index]))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(results[index].score.color)
                     }
@@ -195,6 +209,7 @@ struct PersonalizedSpeakingPracticeView: View {
                 }
 
                 Button("Finish") {
+                    cleanupRecordings()
                     onFinished()
                     dismiss()
                 }
@@ -221,7 +236,7 @@ struct PersonalizedSpeakingPracticeView: View {
         RecordingHelper.requestMicrophonePermission { granted in
             guard granted else { return }
             do {
-                let newRecorder = try RecordingHelper.makeRecorder(fileName: "poc-\(UUID().uuidString).m4a")
+                let newRecorder = try RecordingHelper.makeRecorder(fileName: "poc-\(UUID().uuidString).wav")
                 recorder = newRecorder
                 recordingSeconds = 0
                 newRecorder.record()
@@ -253,15 +268,58 @@ struct PersonalizedSpeakingPracticeView: View {
 
     private func analyze(url: URL, step: Int) {
         isChecking = true
-        PronunciationHelper.requestSpeechPermission { granted in
-            guard granted else {
-                isChecking = false
-                return
-            }
-            PronunciationHelper.analyze(from: url, targetText: prompts[step]) { result in
+        assessmentTask?.cancel()
+        assessmentTask = Task { @MainActor in
+            do {
+                guard let service = PronunciationService.configured else {
+                    throw PronunciationServiceError.missingConfiguration
+                }
+                let result = try await service.assess(fileURL: url, referenceText: prompts[step])
                 results[step] = result
-                isChecking = false
+            } catch {
+                if Task.isCancelled { return }
+                results[step] = PronunciationResult()
+                pronunciationError = error.localizedDescription
+                print("Azure pronunciation assessment failed: \(error)")
             }
+            isChecking = false
+            assessmentTask = nil
+        }
+    }
+
+    private func scoreLabel(for result: PronunciationResult) -> String {
+        guard let percentage = result.percentage else {
+            return result.score.title
+        }
+        return "\(result.score.title) · PronScore: \(Int(percentage.rounded()))/100"
+    }
+
+    private func coloredPromptText(prompt: String, result: PronunciationResult) -> Text {
+        let words = prompt.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        return words.enumerated().reduce(Text("")) { output, element in
+            let (index, word) = element
+            let color = wordColor(for: index, promptWord: word, result: result)
+            let styledWord = Text(word).foregroundColor(color)
+            return output + (index == 0 ? styledWord : Text(" ") + styledWord)
+        }
+    }
+
+    private func wordColor(for index: Int, promptWord: String, result: PronunciationResult) -> Color {
+        if result.words.indices.contains(index) {
+            return result.words[index].color
+        }
+        guard let percentage = result.percentage else { return .primary }
+        let normalizedPromptWord = promptWord.lowercased().filter(\.isLetter)
+        let recognized = result.recognizedText
+            .split(whereSeparator: { !$0.isLetter })
+            .map { $0.lowercased() }
+        guard recognized.contains(normalizedPromptWord) else { return .red }
+        return PronunciationWordResult(word: promptWord, score: percentage).color
+    }
+
+    private func cleanupRecordings() {
+        recordingURLs.compactMap { $0 }.forEach {
+            try? FileManager.default.removeItem(at: $0)
         }
     }
 }

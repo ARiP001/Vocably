@@ -21,6 +21,8 @@ struct LearnSentenceView: View {
     @State private var recordingTimer: Timer?
     @State private var isCheckingPronunciation = false
     @State private var pronunciationResult = PronunciationResult()
+    @State private var pronunciationError: String?
+    @State private var assessmentTask: Task<Void, Never>?
     
     private var activeExample: Example? {
         let examples = session.currentExamples
@@ -63,9 +65,7 @@ struct LearnSentenceView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
 
-                    Text(activeExample?.exampleEN ?? "No sentence")
-                        .font(.title)
-                        .multilineTextAlignment(.center)
+                    sentenceText
 
                     Button {
                         SpeechHelper.speak(activeExample?.exampleEN ?? "", languageCode: "en-US")
@@ -189,6 +189,18 @@ struct LearnSentenceView: View {
                 .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled(true)
         }
+        .alert("Pronunciation check failed", isPresented: Binding(
+            get: { pronunciationError != nil },
+            set: { if !$0 { pronunciationError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(pronunciationError ?? "Please try recording again.")
+        }
+        .onDisappear {
+            assessmentTask?.cancel()
+            isCheckingPronunciation = false
+        }
     }
 
     private func startRecording() {
@@ -196,7 +208,7 @@ struct LearnSentenceView: View {
             guard granted else { return }
 
             do {
-                let fileName = "sentence-\(currentStep)-\(UUID().uuidString).m4a"
+                let fileName = "sentence-\(currentStep)-\(UUID().uuidString).wav"
                 let newRecorder = try RecordingHelper.makeRecorder(fileName: fileName)
                 recorder = newRecorder
                 recordingSeconds = 0
@@ -233,19 +245,26 @@ struct LearnSentenceView: View {
 
     private func analyzePronunciation(fileURL: URL) {
         pronunciationResult = PronunciationResult()
+        pronunciationError = nil
         isCheckingPronunciation = true
 
         let targetSentence = activeExample?.exampleEN ?? ""
-        PronunciationHelper.requestSpeechPermission { granted in
-            guard granted else {
-                isCheckingPronunciation = false
-                return
+        assessmentTask?.cancel()
+        assessmentTask = Task { @MainActor in
+            do {
+                guard let service = PronunciationService.configured else {
+                    throw PronunciationServiceError.missingConfiguration
+                }
+                pronunciationResult = try await service.assess(fileURL: fileURL, referenceText: targetSentence)
+                session.savePronunciationResult(forStep: currentStep, result: pronunciationResult)
+            } catch {
+                if Task.isCancelled { return }
+                pronunciationResult = PronunciationResult()
+                pronunciationError = error.localizedDescription
+                print("Azure pronunciation assessment failed: \(error)")
             }
-
-            PronunciationHelper.analyze(from: fileURL, targetText: targetSentence) { result in
-                pronunciationResult = result
-                isCheckingPronunciation = false
-            }
+            isCheckingPronunciation = false
+            assessmentTask = nil
         }
     }
 
@@ -265,13 +284,13 @@ struct LearnSentenceView: View {
                     ProgressView()
                         .controlSize(.small)
                 } else {
-                    Text(pronunciationResult.score.title)
+                    Text(scoreLabel)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(pronunciationResult.score.color)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(pronunciationResult.score.color.opacity(0.12))
-                        .clipShape(Capsule())
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(pronunciationResult.score.color.opacity(0.12))
+                    .clipShape(Capsule())
                 }
             }
 
@@ -288,6 +307,48 @@ struct LearnSentenceView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal)
     }
+
+    private var scoreLabel: String {
+        guard let percentage = pronunciationResult.percentage else {
+            return "--/100"
+        }
+        return "\(pronunciationResult.score.title) · PronScore: \(Int(percentage.rounded()))/100"
+    }
+
+    private var sentenceText: some View {
+        let words = (activeExample?.exampleEN ?? "No sentence").split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        let sentence = words.enumerated().reduce(Text("")) { result, element in
+            let (index, word) = element
+            let wordText = Text(word)
+                .font(.title)
+                .foregroundColor(pronunciationColor(for: index) ?? .primary)
+            return result + (index == 0 ? wordText : Text(" ") + wordText)
+        }
+        return sentence.multilineTextAlignment(.center)
+    }
+
+    private func pronunciationColor(for index: Int) -> Color? {
+        if pronunciationResult.words.indices.contains(index) {
+            return pronunciationResult.words[index].color
+        }
+
+        // Some Azure responses include the overall HundredMark score but omit
+        // the Words array. Keep the per-word UI visible using recognized text
+        // as a fallback instead of silently showing an uncolored sentence.
+        guard let percentage = pronunciationResult.percentage else { return nil }
+        let targetWords = (activeExample?.exampleEN ?? "")
+            .split(whereSeparator: { !$0.isLetter })
+            .map { $0.lowercased() }
+        guard targetWords.indices.contains(index) else { return .red }
+
+        let recognizedWords = pronunciationResult.recognizedText
+            .split(whereSeparator: { !$0.isLetter })
+            .map { $0.lowercased() }
+        return recognizedWords.contains(targetWords[index])
+            ? PronunciationWordResult(word: targetWords[index], score: percentage).color
+            : .red
+    }
+
 }
 #Preview{
     NavigationStack {
