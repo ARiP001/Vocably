@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-enum AppFont {
+extension Font {
     static let largeTitleBold: Font = .largeTitle.bold()
     static let title1Bold: Font = .title.bold()
     static let title2Bold: Font = .title2.bold()
@@ -22,22 +22,4 @@ enum AppFont {
     static let caption1Bold: Font = .caption.bold()
     static let caption1Semibold: Font = .caption.weight(.semibold)
     static let caption2Bold: Font = .caption2.bold()
-}
-
-extension Font {
-    static let appLargeTitleBold = AppFont.largeTitleBold
-    static let appTitle1Bold = AppFont.title1Bold
-    static let appTitle2Bold = AppFont.title2Bold
-    static let appTitle2Regular = AppFont.title2Regular
-    static let appTitle3Bold = AppFont.title3Bold
-    static let appHeadlineRegular = AppFont.headlineRegular
-    static let appBodyRegular = AppFont.bodyRegular
-    static let appSubheadRegular = AppFont.subheadRegular
-    static let appSubheadMedium = AppFont.subheadMedium
-    static let appSubheadSemibold = AppFont.subheadSemibold
-    static let appCaption1Regular = AppFont.caption1Regular
-    static let appCaption1Medium = AppFont.caption1Medium
-    static let appCaption1Bold = AppFont.caption1Bold
-    static let appCaption1Semibold = AppFont.caption1Semibold
-    static let appCaption2Bold = AppFont.caption2Bold
 }

@@ -26,7 +26,7 @@ struct Onboarding1View: View {
                     .frame(width: 220, height: 220)
                     .padding(.top, Spacing.lg)
                 Text("Can you tell us about yourself")
-                    .font(AppFont.title2Regular)
+                    .font(.title2Regular)
                     .multilineTextAlignment(.center)
                     .padding(.top, Spacing.sm)
                 

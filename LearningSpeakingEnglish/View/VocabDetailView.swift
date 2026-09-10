@@ -72,13 +72,13 @@ struct VocabDetailView: View {
         VStack(spacing: Spacing.sm) {
             HStack {
                 Text("Daily Progress")
-                    .font(AppFont.caption1Regular)
+                    .font(.caption1Regular)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
                 Text(session.progressText)
-                    .font(AppFont.caption1Semibold)
+                    .font(.caption1Semibold)
                     .foregroundStyle(Color.brandPrimary)
             }
 
@@ -95,12 +95,12 @@ struct VocabDetailView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(vocab.nameEN)
-                        .font(AppFont.largeTitleBold)
+                        .font(.largeTitleBold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     if isCurrentVocabLearned {
                         Text("Learned")
-                            .font(AppFont.caption2Bold)
+                            .font(.caption2Bold)
                             .foregroundStyle(Color.brandPrimary)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -114,7 +114,7 @@ struct VocabDetailView: View {
                 Button("Skip") {
                     showSkipAlert = true
                 }
-                .font(AppFont.caption1Semibold)
+                .font(.caption1Semibold)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
@@ -128,7 +128,7 @@ struct VocabDetailView: View {
                 } label: {
                     HStack(spacing: Spacing.sm) {
                         Text(vocab.pronoun)
-                            .font(AppFont.subheadMedium)
+                            .font(.subheadMedium)
                         Image.speaker
                     }
                     .foregroundStyle(Color.brandSecondary)
@@ -143,7 +143,7 @@ struct VocabDetailView: View {
             }
 
             Text(vocab.nameID)
-                .font(AppFont.title3Bold)
+                .font(.title3Bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Divider()
@@ -151,11 +151,11 @@ struct VocabDetailView: View {
 
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text("(\(vocab.wordTypeEN)) \(vocab.meaningEN)")
-                    .font(AppFont.bodyRegular)
+                    .font(.bodyRegular)
                     .foregroundStyle(.primary)
 
                 Text("(\(vocab.wordTypeID)) \(vocab.meaningID)")
-                    .font(AppFont.bodyRegular)
+                    .font(.bodyRegular)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -170,13 +170,13 @@ struct VocabDetailView: View {
 
         return VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Examples")
-                .font(AppFont.headlineRegular)
+                .font(.headlineRegular)
 
             ForEach(Array(selectedExamples.enumerated()), id: \.element.id) { index, example in
                 HStack(alignment: .top, spacing: 12) {
                     VStack(spacing: 6) {
                         Text("\(index + 1)")
-                            .font(AppFont.subheadSemibold)
+                            .font(.subheadSemibold)
                         Button {
                             SpeechHelper.speak(example.exampleEN, languageCode: "en-US")
                         } label: {
@@ -190,11 +190,11 @@ struct VocabDetailView: View {
 
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text(example.exampleEN)
-                            .font(AppFont.bodyRegular)
+                            .font(.bodyRegular)
                             .fixedSize(horizontal: false, vertical: true)
 
                         Text(example.exampleID)
-                            .font(AppFont.bodyRegular)
+                            .font(.bodyRegular)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -253,13 +253,13 @@ struct RunnerProgressView: View {
                     .frame(width: width * normalizedProgress, height: 6)
 
                 Image.run
-                    .font(AppFont.caption1Bold)
+                    .font(.caption1Bold)
                     .offset(x: max(0, width * normalizedProgress - 9))
 
                 HStack {
                     Spacer()
                     Image.flag
-                        .font(AppFont.caption1Bold)
+                        .font(.caption1Bold)
                         .offset(x: 12)
                 }
             }

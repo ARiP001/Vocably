@@ -47,7 +47,7 @@ struct CuratedMissionDetailView: View {
                 Button("See More Definitions") {
                     showFullDetails = true
                 }
-                .font(AppFont.subheadSemibold)
+                .font(.subheadSemibold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
                 .background(Color.bgSecondary)
@@ -121,9 +121,9 @@ struct CuratedMissionDetailView: View {
                 .tint(Color.brandPrimary)
             VStack(alignment: .leading, spacing: 3) {
                 Text("Preparing your lesson")
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                 Text("Selecting useful meanings and creating practice content…")
-                    .font(AppFont.caption1Regular)
+                    .font(.caption1Regular)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -145,9 +145,9 @@ struct CuratedMissionDetailView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(vocabulary.word)
-                        .font(AppFont.largeTitleBold)
+                        .font(.largeTitleBold)
                     Text(content.translation?.word ?? "")
-                        .font(AppFont.title3Bold)
+                        .font(.title3Bold)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -160,7 +160,7 @@ struct CuratedMissionDetailView: View {
                         } icon: {
                             Image.speaker
                         }
-                            .font(AppFont.subheadMedium)
+                            .font(.subheadMedium)
                             .foregroundStyle(Color.brandSecondary)
                             .padding(.horizontal, 11)
                             .padding(.vertical, 8)
@@ -178,7 +178,7 @@ struct CuratedMissionDetailView: View {
                     Text(translation)
                 }
             }
-            .font(AppFont.subheadRegular)
+            .font(.subheadRegular)
             .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -198,30 +198,30 @@ struct CuratedMissionDetailView: View {
 
         return VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Meaning \(index + 1)")
-                .font(AppFont.headlineRegular)
+                .font(.headlineRegular)
 
             if let label = definition.label {
                 Text(label)
-                    .font(AppFont.caption1Regular)
+                    .font(.caption1Regular)
                     .italic()
                     .foregroundStyle(.secondary)
             }
 
             if let description = definition.description {
                 Text(description)
-                    .font(AppFont.bodyRegular)
+                    .font(.bodyRegular)
             }
 
             if let definitionTranslation, !definitionTranslation.isEmpty {
                 Text(definitionTranslation)
-                    .font(AppFont.bodyRegular)
+                    .font(.bodyRegular)
                     .foregroundStyle(.secondary)
             }
 
             if !examples.isEmpty {
                 Divider()
                 Text("Practice in \(selectedDomain)")
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                     .foregroundStyle(Color.brandSecondary)
 
                 ForEach(Array(examples.enumerated()), id: \.offset) { exampleIndex, example in
@@ -238,7 +238,7 @@ struct CuratedMissionDetailView: View {
                         }
                         if translations.indices.contains(exampleIndex), !translations[exampleIndex].isEmpty {
                             Text(translations[exampleIndex])
-                                .font(AppFont.subheadRegular)
+                                .font(.subheadRegular)
                                 .foregroundStyle(.secondary)
                                 .padding(.leading, 27)
                         }
@@ -283,7 +283,7 @@ struct FullVocabularyDetailView: View {
                     Text(vocabulary.word)
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                     Text(vocabulary.partOfSpeech.capitalized)
-                        .font(AppFont.subheadMedium)
+                        .font(.subheadMedium)
                         .foregroundStyle(.secondary)
                 }
 
@@ -300,7 +300,7 @@ struct FullVocabularyDetailView: View {
                         } icon: {
                             Image.speaker
                         }
-                            .font(AppFont.subheadMedium)
+                            .font(.subheadMedium)
                             .foregroundStyle(Color.brandSecondary)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 9)
@@ -325,7 +325,7 @@ struct FullVocabularyDetailView: View {
 
     private func metadataBadge(_ text: String, icon: String) -> some View {
         Label(text, systemImage: icon)
-            .font(AppFont.caption1Medium)
+            .font(.caption1Medium)
             .foregroundStyle(.secondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
@@ -336,18 +336,18 @@ struct FullVocabularyDetailView: View {
     private func definitionCard(_ definition: RecommendedDefinition, index: Int) -> some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Meaning \(index + 1)")
-                .font(AppFont.headlineRegular)
+                .font(.headlineRegular)
 
             if let label = definition.label, !label.isEmpty {
                 Text(label)
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                     .italic()
                     .foregroundStyle(Color.brandSecondary)
             }
 
             if let description = definition.description, !description.isEmpty {
                 Text(description)
-                    .font(AppFont.bodyRegular)
+                    .font(.bodyRegular)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -355,16 +355,16 @@ struct FullVocabularyDetailView: View {
             if let examples = definition.examples, !examples.isEmpty {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     Text("Examples")
-                        .font(AppFont.caption1Bold)
+                        .font(.caption1Bold)
                         .foregroundStyle(.secondary)
 
                     ForEach(examples, id: \.self) { example in
                         HStack(alignment: .top, spacing: Spacing.sm) {
                             Image.quoteOpening
-                                .font(AppFont.caption1Regular)
+                                .font(.caption1Regular)
                                 .foregroundStyle(Color.brandSecondary)
                             Text(example)
-                                .font(AppFont.subheadRegular)
+                                .font(.subheadRegular)
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

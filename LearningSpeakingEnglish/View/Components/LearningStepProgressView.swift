@@ -21,10 +21,10 @@ struct LearningStepProgressView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Text("Learning Progress")
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                 Spacer()
                 Text("Step \(currentStep)/\(safeTotal)")
-                    .font(AppFont.caption1Medium)
+                    .font(.caption1Medium)
                     .foregroundStyle(.secondary)
             }
 

@@ -28,7 +28,7 @@ struct SplashView: View {
                     .opacity(animate ? 1 : 0.7)
 
                 Text("Vocab.ly")
-                    .font(AppFont.title3Bold)
+                    .font(.title3Bold)
                     .opacity(animate ? 1 : 0.75)
             }
             .padding()

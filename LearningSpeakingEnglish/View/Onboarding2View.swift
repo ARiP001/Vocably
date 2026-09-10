@@ -22,7 +22,7 @@ struct Onboarding2View: View {
                 
                 Divider()
                 Text("How many Vocab you\nwant to learn per day ?")
-                    .font(AppFont.title2Regular)
+                    .font(.title2Regular)
                     .multilineTextAlignment(.center)
                     .padding(.top, Spacing.xl)
                 HStack(spacing: 60) {
@@ -55,7 +55,7 @@ struct Onboarding2View: View {
                 }
                 .padding(.vertical, Spacing.xxl)
                 Text("Tips : It's recommended to start low")
-                    .font(AppFont.bodyRegular)
+                    .font(.bodyRegular)
                     .foregroundStyle(.gray)
                 
                 Spacer()

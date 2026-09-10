@@ -52,15 +52,15 @@ struct MissionHomeView: View {
     private var greetingCard: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Welcome back")
-                .font(AppFont.caption1Regular)
+                .font(.caption1Regular)
                 .foregroundStyle(.secondary)
 
             Text(displayName)
-                .font(AppFont.title3Bold)
+                .font(.title3Bold)
                 .foregroundStyle(.primary)
 
             Text("Ready for your mission today?")
-                .font(AppFont.subheadRegular)
+                .font(.subheadRegular)
                 .foregroundStyle(.secondary)
         }
         .padding(.horizontal, Spacing.md)
@@ -73,10 +73,10 @@ struct MissionHomeView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Text("Daily Progress")
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                 Spacer()
                 Text(session.progressText)
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                     .foregroundStyle(Color.brandPrimary)
             }
 
@@ -100,9 +100,9 @@ struct MissionHomeView: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("Congratulations!")
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                 Text("You hit your daily vocab target.")
-                    .font(AppFont.caption1Regular)
+                    .font(.caption1Regular)
                     .foregroundStyle(.secondary)
             }
             
@@ -116,18 +116,18 @@ struct MissionHomeView: View {
     private var missionCard: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Today's Mission")
-                .font(AppFont.headlineRegular)
+                .font(.headlineRegular)
 
             if let vocab = recommendedVocabulary {
                 HStack(alignment: .top, spacing: 12) {
                     Text(vocab.word)
-                        .font(AppFont.title1Bold)
+                        .font(.title1Bold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Button("Skip") {
                         recommendNext(excluding: vocab.id)
                     }
-                    .font(AppFont.caption1Semibold)
+                    .font(.caption1Semibold)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -141,7 +141,7 @@ struct MissionHomeView: View {
                     } label: {
                         HStack(spacing: Spacing.sm) {
                             Text(vocab.pronunciation?.ipa ?? "Listen")
-                                .font(AppFont.subheadMedium)
+                                .font(.subheadMedium)
                             Image.speaker
                         }
                         .foregroundStyle(Color.brandSecondary)
@@ -156,7 +156,7 @@ struct MissionHomeView: View {
                 }
 
                 Text(vocab.allDefinitions.first?.description ?? "Vocabulary practice")
-                    .font(AppFont.subheadRegular)
+                    .font(.subheadRegular)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 

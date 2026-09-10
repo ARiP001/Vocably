@@ -84,10 +84,10 @@ struct PersonalizedSpeakingPracticeView: View {
 
             VStack(spacing: Spacing.md) {
                 Text(currentStep == 0 ? "Say this word clearly" : "Practice this sentence")
-                    .font(AppFont.subheadMedium)
+                    .font(.subheadMedium)
                     .foregroundStyle(.secondary)
                 coloredPromptText(prompt: currentPrompt, result: results[currentStep])
-                    .font(currentStep == 0 ? .system(size: 40, weight: .bold) : AppFont.title2Bold)
+                    .font(currentStep == 0 ? .system(size: 40, weight: .bold) : .title2Bold)
                     .multilineTextAlignment(.center)
                 Button {
                     SpeechHelper.speak(currentPrompt)
@@ -97,7 +97,7 @@ struct PersonalizedSpeakingPracticeView: View {
                     } icon: {
                         Image.speaker
                     }
-                    .font(AppFont.subheadMedium)
+                    .font(.subheadMedium)
                     .foregroundStyle(Color.brandSecondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -178,20 +178,20 @@ struct PersonalizedSpeakingPracticeView: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Text("Pronunciation check")
-                    .font(AppFont.subheadSemibold)
+                    .font(.subheadSemibold)
                     .foregroundStyle(.secondary)
                 Spacer()
                 if isChecking {
                     ProgressView().controlSize(.small)
                 } else {
                     Text(scoreLabel(for: results[currentStep]))
-                        .font(AppFont.subheadSemibold)
+                        .font(.subheadSemibold)
                         .foregroundStyle(results[currentStep].score.color)
                 }
             }
             if !results[currentStep].recognizedText.isEmpty {
                 Text("Detected: \(results[currentStep].recognizedText)")
-                    .font(AppFont.subheadRegular)
+                    .font(.subheadRegular)
                     .foregroundStyle(.secondary)
             }
         }
@@ -205,16 +205,16 @@ struct PersonalizedSpeakingPracticeView: View {
         ScrollView {
             VStack(spacing: Spacing.md) {
                 Text("Listen and compare before you finish")
-                    .font(AppFont.subheadRegular)
+                    .font(.subheadRegular)
                     .foregroundStyle(.secondary)
 
                 ForEach(prompts.indices, id: \.self) { index in
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         Text(index == 0 ? "Word" : "Sentence \(index)")
-                            .font(AppFont.caption1Semibold)
+                            .font(.caption1Semibold)
                             .foregroundStyle(.secondary)
                         coloredPromptText(prompt: prompts[index], result: results[index])
-                            .font(AppFont.headlineRegular)
+                            .font(.headlineRegular)
                         HStack(spacing: Spacing.sm) {
                             Button {
                                  SpeechHelper.speak(prompts[index])
@@ -224,7 +224,7 @@ struct PersonalizedSpeakingPracticeView: View {
                                 } icon: {
                                     Image.play
                                 }
-                                .font(AppFont.subheadMedium)
+                                .font(.subheadMedium)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 13)
                                 .background(Color.white)
@@ -240,7 +240,7 @@ struct PersonalizedSpeakingPracticeView: View {
                                 } icon: {
                                     Image.waveform
                                 }
-                                .font(AppFont.subheadMedium)
+                                .font(.subheadMedium)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 13)
                                 .background(Color.brandPrimary)
@@ -249,7 +249,7 @@ struct PersonalizedSpeakingPracticeView: View {
                             }
                         }
                         Text(scoreLabel(for: results[index]))
-                            .font(AppFont.caption1Semibold)
+                            .font(.caption1Semibold)
                             .foregroundStyle(results[index].score.color)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

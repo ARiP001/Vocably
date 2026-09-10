@@ -32,7 +32,7 @@ struct ListView: View {
                     VStack(spacing: Spacing.md) {
                         ProgressView()
                         Text("Loading vocabulary…")
-                            .font(AppFont.subheadRegular)
+                            .font(.subheadRegular)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -49,11 +49,11 @@ struct ListView: View {
                             VStack(alignment: .leading, spacing: Spacing.xs) {
                                 HStack {
                                     Text(item.vocabulary.word)
-                                        .font(AppFont.headlineRegular)
+                                        .font(.headlineRegular)
                                     Spacer()
                                     if isLearned(item.vocabulary) {
                                         Text("Learned")
-                                            .font(AppFont.caption1Semibold)
+                                            .font(.caption1Semibold)
                                             .foregroundStyle(Color.brandPrimary)
                                             .padding(.horizontal, 7)
                                             .padding(.vertical, 3)
@@ -67,7 +67,7 @@ struct ListView: View {
                                     Text("•")
                                     Text(item.vocabulary.domain.isEmpty ? "General" : item.vocabulary.domain.joined(separator: ", "))
                                 }
-                                .font(AppFont.subheadRegular)
+                                .font(.subheadRegular)
                                 .foregroundStyle(.secondary)
                             }
                             .padding(.vertical, 4)

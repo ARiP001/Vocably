@@ -25,7 +25,7 @@ struct ResultAlertView: View {
                     }
                 VStack(spacing: Spacing.lg) {
                     Text("Rate your learn result")
-                        .font(AppFont.title3Bold)
+                        .font(.title3Bold)
                     HStack(spacing: Spacing.sm) {
                         ForEach(0..<5) { i in
                             (i < rating ? Image.starFill : Image.star)

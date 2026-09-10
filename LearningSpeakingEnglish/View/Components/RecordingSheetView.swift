@@ -21,12 +21,12 @@ struct RecordingSheetView: View {
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(recordingTitle)
-                    .font(AppFont.title2Bold)
+                    .font(.title2Bold)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(recordingHint)
-                    .font(AppFont.subheadRegular)
+                    .font(.subheadRegular)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -57,7 +57,7 @@ struct RecordingSheetView: View {
                 onStopRecording()
             } label: {
                 Image.stop
-                    .font(AppFont.title2Bold)
+                    .font(.title2Bold)
                     .foregroundStyle(.white)
                     .frame(width: 72, height: 72)
                     .background(Color.brandSecondary)
