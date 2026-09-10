@@ -261,7 +261,7 @@ struct FullVocabularyDetailView: View {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(vocabulary.word)
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .font(.largeTitleBold)
                     Text(vocabulary.partOfSpeech.capitalized)
                         .font(.subheadMedium)
                         .foregroundStyle(.secondary)

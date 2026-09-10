@@ -33,13 +33,13 @@ struct Onboarding2View: View {
                         }
                     } label: {
                         Text("-")
-                            .font(.system(size: 50, weight: .light))
+                            .font(.largeTitleBold)
                             .foregroundStyle(Color.brandSecondary)
                     }
                     
                     VStack(spacing: Spacing.xs) {
                         Text("\(numberVocab)")
-                            .font(.system(size: 70, weight: .medium))
+                            .font(.largeTitleBold)
                         Rectangle()
                             .fill(Color.brandPrimary.opacity(0.35))
                             .frame(width: 40, height: 2)
@@ -49,7 +49,7 @@ struct Onboarding2View: View {
                         numberVocab += 1
                     } label: {
                         Text("+")
-                            .font(.system(size: 50, weight: .light))
+                            .font(.largeTitleBold)
                             .foregroundStyle(Color.brandSecondary)
                     }
                 }

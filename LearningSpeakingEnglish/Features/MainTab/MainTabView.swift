@@ -83,17 +83,20 @@ struct MainTabView: View {
         hasRestoredProgress = true
 
         let store = progressStore
-        let learnedNames = store.learnedVocabNamesCSV
-            .split(separator: ",")
-            .map { String($0) }
+        let learnedNames = Set(
+            store.learnedVocabNamesCSV
+                .split(separator: ",")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+                .filter { !$0.isEmpty }
+        )
 
         let restoredLearnedIDs = session.vocabList
-            .filter { learnedNames.contains($0.nameEN) }
+            .filter { learnedNames.contains($0.nameEN.lowercased()) }
             .map { $0.id }
         session.learnedVocabIDs = restoredLearnedIDs
 
         if !store.currentVocabName.isEmpty,
-           let restoredIndex = session.vocabList.firstIndex(where: { $0.nameEN == store.currentVocabName }) {
+           let restoredIndex = session.vocabList.firstIndex(where: { $0.nameEN.caseInsensitiveCompare(store.currentVocabName) == .orderedSame }) {
             session.currentIndex = restoredIndex
         }
     }

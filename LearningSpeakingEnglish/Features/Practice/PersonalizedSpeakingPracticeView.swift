@@ -87,7 +87,7 @@ struct PersonalizedSpeakingPracticeView: View {
                     .font(.subheadMedium)
                     .foregroundStyle(.secondary)
                 coloredPromptText(prompt: currentPrompt, result: results[currentStep])
-                    .font(currentStep == 0 ? .system(size: 40, weight: .bold) : .title2Bold)
+                    .font(currentStep == 0 ? .largeTitleBold : .title2Bold)
                     .multilineTextAlignment(.center)
                 Button {
                     SpeechHelper.speak(currentPrompt)
@@ -123,7 +123,7 @@ struct PersonalizedSpeakingPracticeView: View {
                 startRecording()
             } label: {
                 Image.microphone
-                    .font(.system(size: microphoneIsSecondary ? 25 : 38, weight: .medium))
+                    .font(microphoneIsSecondary ? .title2Bold : .largeTitleBold)
                     .frame(width: microphoneIsSecondary ? 68 : 100, height: microphoneIsSecondary ? 68 : 100)
                     .background(microphoneIsSecondary ? Color.white : Color.brandPrimary)
                     .clipShape(Circle())

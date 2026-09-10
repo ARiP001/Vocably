@@ -84,6 +84,17 @@ struct LearningSession {
     var currentIndex: Int = 0
     var learnedVocabIDs: [UUID] = []
 
+    /// Set of lowercase vocabulary names that have been marked as learned.
+    var learnedWordNames: Set<String> {
+        let learnedSet = Set(learnedVocabIDs)
+        return Set(vocabList.filter { learnedSet.contains($0.id) }.map { $0.nameEN.lowercased() })
+    }
+
+    /// Checks whether a given vocabulary word has already been learned.
+    func isLearned(word: String) -> Bool {
+        learnedWordNames.contains(word.lowercased())
+    }
+
     /// Safe daily target, clamped to available vocab count.
     var dailyTargetCount: Int {
         if vocabList.isEmpty {

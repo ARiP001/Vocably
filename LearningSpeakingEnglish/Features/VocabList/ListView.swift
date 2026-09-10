@@ -99,12 +99,7 @@ struct ListView: View {
     }
 
     private func isLearned(_ vocabulary: RecommendedVocabulary) -> Bool {
-        guard let legacyVocab = session.vocabList.first(where: {
-            $0.nameEN.caseInsensitiveCompare(vocabulary.word) == .orderedSame
-        }) else {
-            return false
-        }
-        return session.learnedVocabIDs.contains(legacyVocab.id)
+        session.isLearned(word: vocabulary.word)
     }
 }
 
