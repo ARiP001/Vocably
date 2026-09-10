@@ -16,7 +16,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Config.xcconfig,
-				Info.plist,
 			);
 			target = 5EAF88432F88E2DD00A5AEE2 /* LearningSpeakingEnglish */;
 		};
@@ -283,7 +282,6 @@
 				DEVELOPMENT_TEAM = YC8SS4YRCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LearningSpeakingEnglish/Info.plist;
 				INFOPLIST_KEY_AZURE_SPEECH_KEY = "$(AZURE_SPEECH_KEY)";
 				INFOPLIST_KEY_AZURE_SPEECH_REGION = "$(AZURE_SPEECH_REGION)";
 				INFOPLIST_KEY_CFBundleDisplayName = Vocab.ly;
@@ -322,7 +320,6 @@
 				DEVELOPMENT_TEAM = YC8SS4YRCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LearningSpeakingEnglish/Info.plist;
 				INFOPLIST_KEY_AZURE_SPEECH_KEY = "$(AZURE_SPEECH_KEY)";
 				INFOPLIST_KEY_AZURE_SPEECH_REGION = "$(AZURE_SPEECH_REGION)";
 				INFOPLIST_KEY_CFBundleDisplayName = Vocab.ly;

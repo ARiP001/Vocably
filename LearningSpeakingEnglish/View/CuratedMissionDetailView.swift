@@ -173,8 +173,6 @@ struct CuratedMissionDetailView: View {
                     Text("•")
                     Text(translation)
                 }
-                Text("•")
-                Text(vocabulary.cefrLevel)
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
@@ -195,20 +193,8 @@ struct CuratedMissionDetailView: View {
             : nil
 
         return VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("Meaning \(index + 1)")
-                    .font(.headline)
-                Spacer()
-                if let cefr = definition.cefr {
-                    Text(cefr)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.appPrimary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.appPrimary.opacity(0.12))
-                        .clipShape(Capsule())
-                }
-            }
+            Text("Meaning \(index + 1)")
+                .font(.headline)
 
             if let label = definition.label {
                 Text(label)
@@ -298,14 +284,6 @@ struct FullVocabularyDetailView: View {
                 }
 
                 Spacer()
-
-                Text(vocabulary.cefrLevel)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Color.appPrimary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 7)
-                    .background(Color.appPrimary.opacity(0.12))
-                    .clipShape(Capsule())
             }
 
             HStack(spacing: 10) {
@@ -349,16 +327,8 @@ struct FullVocabularyDetailView: View {
 
     private func definitionCard(_ definition: RecommendedDefinition, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                Text("Meaning \(index + 1)")
-                    .font(.headline)
-                Spacer()
-                if let cefr = definition.cefr, !cefr.isEmpty {
-                    Text(cefr)
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.secondary)
-                }
-            }
+            Text("Meaning \(index + 1)")
+                .font(.headline)
 
             if let label = definition.label, !label.isEmpty {
                 Text(label)

@@ -50,13 +50,15 @@ struct ListView: View {
                                     Text(item.vocabulary.word)
                                         .font(.headline)
                                     Spacer()
-                                    Text(isLearned(item.vocabulary) ? "Learned" : item.vocabulary.cefrLevel)
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundStyle(isLearned(item.vocabulary) ? Color.appPrimary : .secondary)
-                                        .padding(.horizontal, 7)
-                                        .padding(.vertical, 3)
-                                        .background((isLearned(item.vocabulary) ? Color.appPrimary : Color.gray).opacity(0.12))
-                                        .clipShape(Capsule())
+                                    if isLearned(item.vocabulary) {
+                                        Text("Learned")
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(Color.appPrimary)
+                                            .padding(.horizontal, 7)
+                                            .padding(.vertical, 3)
+                                            .background(Color.appPrimary.opacity(0.12))
+                                            .clipShape(Capsule())
+                                    }
                                 }
 
                                 HStack(spacing: 6) {
