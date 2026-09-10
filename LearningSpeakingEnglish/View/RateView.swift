@@ -33,31 +33,25 @@ struct ResultAlertView: View {
                                 .foregroundStyle(Color.brandSecondary)
                         }
                     }
-                    HStack(spacing: 12) {
+                    HStack(spacing: Spacing.sm) {
                         Button {
                             onRetry()
                             isPresented = false
                         } label: {
                             Text("Retry")
+                                .fontWeight(.semibold)
                                 .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.systemGray5))
+                                .padding(.vertical, Spacing.md)
+                                .background(Color.bgSecondary)
                                 .clipShape(Capsule())
                                 .foregroundStyle(Color.brandPrimary)
                         }
                         
-                        Button {
+                        PrimaryButton(title: "Next") {
                             onNext()
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 isPresented = false
                             }
-                        } label: {
-                            Text("Next")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.brandPrimary)
-                                .foregroundStyle(.white)
-                                .clipShape(Capsule())
                         }
                     }
                 }

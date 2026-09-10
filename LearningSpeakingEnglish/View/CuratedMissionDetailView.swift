@@ -54,17 +54,10 @@ struct CuratedMissionDetailView: View {
                 .foregroundStyle(Color.brandPrimary)
                 .clipShape(Capsule())
 
-                Button {
+                PrimaryButton(title: "Speak Now") {
                     showSpeakingPractice = true
-                } label: {
-                    Text("Speak Now")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Spacing.md)
-                        .background(Color.brandPrimary)
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
                 }
+
             }
             .padding()
         }
@@ -152,22 +145,9 @@ struct CuratedMissionDetailView: View {
                 }
                 Spacer()
                 if let ipa = vocabulary.pronunciation?.ipa {
-                    Button {
+                    ListenAudioButton(title: ipa) {
                         SpeechHelper.speak(vocabulary.word)
-                    } label: {
-                        Label {
-                            Text(ipa)
-                        } icon: {
-                            Image.speaker
-                        }
-                            .font(.subheadMedium)
-                            .foregroundStyle(Color.brandSecondary)
-                            .padding(.horizontal, 11)
-                            .padding(.vertical, 8)
-                            .background(Color.brandSecondary.opacity(0.12))
-                            .clipShape(Capsule())
                     }
-                    .buttonStyle(.plain)
                 }
             }
 

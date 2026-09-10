@@ -136,21 +136,9 @@ struct MissionHomeView: View {
                 }
                 
                 HStack {
-                    Button {
+                    ListenAudioButton(title: vocab.pronunciation?.ipa ?? "Listen") {
                         SpeechHelper.speak(vocab.word, languageCode: "en-US")
-                    } label: {
-                        HStack(spacing: Spacing.sm) {
-                            Text(vocab.pronunciation?.ipa ?? "Listen")
-                                .font(.subheadMedium)
-                            Image.speaker
-                        }
-                        .foregroundStyle(Color.brandSecondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color.brandSecondary.opacity(0.12))
-                        .clipShape(Capsule())
                     }
-                    .buttonStyle(.plain)
                     
                     Spacer()
                 }

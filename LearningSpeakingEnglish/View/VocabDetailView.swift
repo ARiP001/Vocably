@@ -123,21 +123,9 @@ struct VocabDetailView: View {
             }
 
             HStack {
-                Button {
+                ListenAudioButton(title: vocab.pronoun) {
                     SpeechHelper.speak(vocab.nameEN, languageCode: "en-US")
-                } label: {
-                    HStack(spacing: Spacing.sm) {
-                        Text(vocab.pronoun)
-                            .font(.subheadMedium)
-                        Image.speaker
-                    }
-                    .foregroundStyle(Color.brandSecondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.brandSecondary.opacity(0.12))
-                    .clipShape(Capsule())
                 }
-                .buttonStyle(.plain)
 
                 Spacer()
             }
@@ -213,58 +201,14 @@ struct VocabDetailView: View {
 
     private var bottomActionBar: some View {
         HStack(spacing: 10) {
-            Button {
+            PrimaryButton(title: "Speak Now") {
                 showLearningFlow = true
-            } label: {
-                Text("Speak Now")
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.brandPrimary)
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
             }
         }
         .padding(.horizontal)
         .padding(.top, 12)
         .padding(.bottom, 14)
         .background(Color.bgPrimary)
-    }
-}
-
-struct RunnerProgressView: View {
-    var progress: CGFloat
-
-    private var normalizedProgress: CGFloat {
-        min(max(progress, 0), 1)
-    }
-
-    var body: some View {
-        GeometryReader { geo in
-            let width = geo.size.width
-
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(Color.gray.opacity(0.25))
-                    .frame(height: 6)
-
-                Capsule()
-                    .fill(Color.brandPrimary)
-                    .frame(width: width * normalizedProgress, height: 6)
-
-                Image.run
-                    .font(.caption1Bold)
-                    .offset(x: max(0, width * normalizedProgress - 9))
-
-                HStack {
-                    Spacer()
-                    Image.flag
-                        .font(.caption1Bold)
-                        .offset(x: 12)
-                }
-            }
-        }
-        .frame(height: 15)
     }
 }
 

@@ -59,16 +59,8 @@ struct Onboarding2View: View {
                     .foregroundStyle(.gray)
                 
                 Spacer()
-                Button {
+                PrimaryButton(title: "Get started") {
                     onComplete(enteredName, max(1, numberVocab), selectedInterest)
-                } label: {
-                    Text("Get started")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Spacing.md)
-                        .background(Color.brandPrimary)
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
                 }
             }
             .padding()

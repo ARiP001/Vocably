@@ -15,6 +15,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Config.xcconfig,
+				Info.plist,
 			);
 			target = 5EAF88432F88E2DD00A5AEE2 /* LearningSpeakingEnglish */;
 		};
@@ -263,6 +264,8 @@
 		};
 		5EAF88502F88E2DE00A5AEE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 5EAF88462F88E2DD00A5AEE2 /* LearningSpeakingEnglish */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -271,6 +274,7 @@
 				DEVELOPMENT_TEAM = YC8SS4YRCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LearningSpeakingEnglish/Info.plist;
 				INFOPLIST_KEY_AZURE_SPEECH_KEY = "$(AZURE_SPEECH_KEY)";
 				INFOPLIST_KEY_AZURE_SPEECH_REGION = "$(AZURE_SPEECH_REGION)";
 				INFOPLIST_KEY_CFBundleDisplayName = Vocab.ly;
@@ -300,6 +304,8 @@
 		};
 		5EAF88512F88E2DE00A5AEE2 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 5EAF88462F88E2DD00A5AEE2 /* LearningSpeakingEnglish */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -308,6 +314,7 @@
 				DEVELOPMENT_TEAM = YC8SS4YRCV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LearningSpeakingEnglish/Info.plist;
 				INFOPLIST_KEY_AZURE_SPEECH_KEY = "$(AZURE_SPEECH_KEY)";
 				INFOPLIST_KEY_AZURE_SPEECH_REGION = "$(AZURE_SPEECH_REGION)";
 				INFOPLIST_KEY_CFBundleDisplayName = Vocab.ly;
