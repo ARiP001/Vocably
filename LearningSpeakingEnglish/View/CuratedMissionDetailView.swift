@@ -47,11 +47,11 @@ struct CuratedMissionDetailView: View {
                 Button("See More Definitions") {
                     showFullDetails = true
                 }
-                .font(.subheadline.weight(.semibold))
+                .font(AppFont.subheadSemibold)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
-                .background(Color(.secondarySystemGroupedBackground))
-                .foregroundStyle(Color.appPrimary)
+                .background(Color.bgSecondary)
+                .foregroundStyle(Color.brandPrimary)
                 .clipShape(Capsule())
 
                 Button {
@@ -60,15 +60,15 @@ struct CuratedMissionDetailView: View {
                     Text("Speak Now")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.appPrimary)
+                        .padding(.vertical, Spacing.md)
+                        .background(Color.brandPrimary)
                         .foregroundStyle(.white)
                         .clipShape(Capsule())
                 }
             }
             .padding()
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .navigationTitle("Mission Detail")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
@@ -118,20 +118,20 @@ struct CuratedMissionDetailView: View {
     private var personalizationLoadingCard: some View {
         HStack(spacing: 12) {
             ProgressView()
-                .tint(Color.appPrimary)
+                .tint(Color.brandPrimary)
             VStack(alignment: .leading, spacing: 3) {
                 Text("Preparing your lesson")
-                    .font(.subheadline.weight(.semibold))
+                    .font(AppFont.subheadSemibold)
                 Text("Selecting useful meanings and creating practice content…")
-                    .font(.caption)
+                    .font(AppFont.caption1Regular)
                     .foregroundStyle(.secondary)
             }
             Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
     }
 
     private var practiceSentences: [String] {
@@ -143,11 +143,11 @@ struct CuratedMissionDetailView: View {
     private var vocabularyCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(vocabulary.word)
-                        .font(.largeTitle.weight(.bold))
+                        .font(AppFont.largeTitleBold)
                     Text(content.translation?.word ?? "")
-                        .font(.title3.weight(.semibold))
+                        .font(AppFont.title3Bold)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -155,12 +155,16 @@ struct CuratedMissionDetailView: View {
                     Button {
                         SpeechHelper.speak(vocabulary.word)
                     } label: {
-                        Label(ipa, systemImage: "speaker.wave.2.fill")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color.appSecondary)
+                        Label {
+                            Text(ipa)
+                        } icon: {
+                            Image.speaker
+                        }
+                            .font(AppFont.subheadMedium)
+                            .foregroundStyle(Color.brandSecondary)
                             .padding(.horizontal, 11)
                             .padding(.vertical, 8)
-                            .background(Color.appSecondary.opacity(0.12))
+                            .background(Color.brandSecondary.opacity(0.12))
                             .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -174,13 +178,13 @@ struct CuratedMissionDetailView: View {
                     Text(translation)
                 }
             }
-            .font(.subheadline)
+            .font(AppFont.subheadRegular)
             .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(Spacing.md)
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
     }
 
     private func definitionCard(_ definition: RecommendedDefinition, index: Int) -> some View {
@@ -192,63 +196,63 @@ struct CuratedMissionDetailView: View {
             ? content.translation?.definitions[index]
             : nil
 
-        return VStack(alignment: .leading, spacing: 14) {
+        return VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Meaning \(index + 1)")
-                .font(.headline)
+                .font(AppFont.headlineRegular)
 
             if let label = definition.label {
                 Text(label)
-                    .font(.caption)
+                    .font(AppFont.caption1Regular)
                     .italic()
                     .foregroundStyle(.secondary)
             }
 
             if let description = definition.description {
                 Text(description)
-                    .font(.body)
+                    .font(AppFont.bodyRegular)
             }
 
             if let definitionTranslation, !definitionTranslation.isEmpty {
                 Text(definitionTranslation)
-                    .font(.body)
+                    .font(AppFont.bodyRegular)
                     .foregroundStyle(.secondary)
             }
 
             if !examples.isEmpty {
                 Divider()
                 Text("Practice in \(selectedDomain)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.appSecondary)
+                    .font(AppFont.subheadSemibold)
+                    .foregroundStyle(Color.brandSecondary)
 
                 ForEach(Array(examples.enumerated()), id: \.offset) { exampleIndex, example in
                     VStack(alignment: .leading, spacing: 6) {
-                        HStack(alignment: .top, spacing: 8) {
+                        HStack(alignment: .top, spacing: Spacing.sm) {
                             Button {
                                 SpeechHelper.speak(example)
                             } label: {
-                                Image(systemName: "speaker.wave.2.fill")
-                                    .foregroundStyle(Color.appSecondary)
+                                Image.speaker
+                                    .foregroundStyle(Color.brandSecondary)
                             }
                             .buttonStyle(.plain)
                             Text(example)
                         }
                         if translations.indices.contains(exampleIndex), !translations[exampleIndex].isEmpty {
                             Text(translations[exampleIndex])
-                                .font(.subheadline)
+                                .font(AppFont.subheadRegular)
                                 .foregroundStyle(.secondary)
                                 .padding(.leading, 27)
                         }
                     }
                     .padding(12)
-                    .background(Color.appSecondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .background(Color.brandSecondary.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(Spacing.md)
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
     }
 }
 
@@ -258,28 +262,28 @@ struct FullVocabularyDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: Spacing.md) {
                 headerCard
 
                 ForEach(Array(vocabulary.allDefinitions.enumerated()), id: \.offset) { index, definition in
                     definitionCard(definition, index: index)
                 }
             }
-            .padding(16)
+            .padding(Spacing.md)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .navigationTitle(vocabulary.word)
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var headerCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(vocabulary.word)
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                     Text(vocabulary.partOfSpeech.capitalized)
-                        .font(.subheadline.weight(.medium))
+                        .font(AppFont.subheadMedium)
                         .foregroundStyle(.secondary)
                 }
 
@@ -291,12 +295,16 @@ struct FullVocabularyDetailView: View {
                     Button {
                         SpeechHelper.speak(vocabulary.word, languageCode: "en-US")
                     } label: {
-                        Label(ipa, systemImage: "speaker.wave.2.fill")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color.appSecondary)
+                        Label {
+                            Text(ipa)
+                        } icon: {
+                            Image.speaker
+                        }
+                            .font(AppFont.subheadMedium)
+                            .foregroundStyle(Color.brandSecondary)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 9)
-                            .background(Color.appSecondary.opacity(0.12))
+                            .background(Color.brandSecondary.opacity(0.12))
                             .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -311,13 +319,13 @@ struct FullVocabularyDetailView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.lg, style: .continuous))
     }
 
     private func metadataBadge(_ text: String, icon: String) -> some View {
         Label(text, systemImage: icon)
-            .font(.caption.weight(.medium))
+            .font(AppFont.caption1Medium)
             .foregroundStyle(.secondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
@@ -326,56 +334,56 @@ struct FullVocabularyDetailView: View {
     }
 
     private func definitionCard(_ definition: RecommendedDefinition, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Meaning \(index + 1)")
-                .font(.headline)
+                .font(AppFont.headlineRegular)
 
             if let label = definition.label, !label.isEmpty {
                 Text(label)
-                    .font(.subheadline.weight(.semibold))
+                    .font(AppFont.subheadSemibold)
                     .italic()
-                    .foregroundStyle(Color.appSecondary)
+                    .foregroundStyle(Color.brandSecondary)
             }
 
             if let description = definition.description, !description.isEmpty {
                 Text(description)
-                    .font(.body)
+                    .font(AppFont.bodyRegular)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             if let examples = definition.examples, !examples.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
                     Text("Examples")
-                        .font(.caption.weight(.bold))
+                        .font(AppFont.caption1Bold)
                         .foregroundStyle(.secondary)
 
                     ForEach(examples, id: \.self) { example in
-                        HStack(alignment: .top, spacing: 8) {
-                            Image(systemName: "quote.opening")
-                                .font(.caption)
-                                .foregroundStyle(Color.appSecondary)
+                        HStack(alignment: .top, spacing: Spacing.sm) {
+                            Image.quoteOpening
+                                .font(AppFont.caption1Regular)
+                                .foregroundStyle(Color.brandSecondary)
                             Text(example)
-                                .font(.subheadline)
+                                .font(AppFont.subheadRegular)
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }
                 .padding(12)
-                .background(Color.appSecondary.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Color.brandSecondary.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
             }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.bgSecondary)
         .overlay(alignment: .leading) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(Color.appPrimary)
+                .fill(Color.brandPrimary)
                 .frame(width: 4)
                 .padding(.vertical, 18)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.lg, style: .continuous))
     }
 }

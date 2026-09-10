@@ -11,24 +11,24 @@ struct SplashView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.appPrimary.opacity(0.14), Color(.systemBackground)],
+                colors: [Color.brandPrimary.opacity(0.14), Color(.systemBackground)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 14) {
+            VStack(spacing: Spacing.md) {
                 Image("AppLogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 132, height: 132)
-                    .clipShape(RoundedRectangle(cornerRadius: 28))
-                    .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
+                    .shadow(color: .black.opacity(0.08), radius: Radius.md, y: 8)
                     .scaleEffect(animate ? 1 : 0.9)
                     .opacity(animate ? 1 : 0.7)
 
                 Text("Vocab.ly")
-                    .font(.title3.weight(.bold))
+                    .font(AppFont.title3Bold)
                     .opacity(animate ? 1 : 0.75)
             }
             .padding()

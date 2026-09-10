@@ -23,14 +23,14 @@ struct ResultAlertView: View {
                             isPresented = false
                         }
                     }
-                VStack(spacing: 20) {
+                VStack(spacing: Spacing.lg) {
                     Text("Rate your learn result")
-                        .font(.title3.weight(.semibold))
-                    HStack(spacing: 8) {
+                        .font(AppFont.title3Bold)
+                    HStack(spacing: Spacing.sm) {
                         ForEach(0..<5) { i in
-                            Image(systemName: i < rating ? "star.fill" : "star")
+                            (i < rating ? Image.starFill : Image.star)
                                 .font(.system(size: 30))
-                                .foregroundStyle(Color.appSecondary)
+                                .foregroundStyle(Color.brandSecondary)
                         }
                     }
                     HStack(spacing: 12) {
@@ -43,7 +43,7 @@ struct ResultAlertView: View {
                                 .padding()
                                 .background(Color(.systemGray5))
                                 .clipShape(Capsule())
-                                .foregroundStyle(Color.appPrimary)
+                                .foregroundStyle(Color.brandPrimary)
                         }
                         
                         Button {
@@ -55,15 +55,15 @@ struct ResultAlertView: View {
                             Text("Next")
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.appPrimary)
+                                .background(Color.brandPrimary)
                                 .foregroundStyle(.white)
                                 .clipShape(Capsule())
                         }
                     }
                 }
-                .padding(24)
+                .padding(Spacing.lg)
                 .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
                 .padding(.horizontal, 40)
                 .shadow(radius: 20)
                 .transition(.scale.combined(with: .opacity))

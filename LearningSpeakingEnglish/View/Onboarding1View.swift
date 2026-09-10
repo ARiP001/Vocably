@@ -15,22 +15,22 @@ struct Onboarding1View: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
+            VStack(spacing: Spacing.lg) {
                 ProgressView(value: 0.5)
-                    .tint(Color.appPrimary)
+                    .tint(Color.brandPrimary)
                     .scaleEffect(x: 1, y: 2)
                 
                 Divider()
                 Image("man-reading-book")
                     .resizable()
                     .frame(width: 220, height: 220)
-                    .padding(.top, 20)
+                    .padding(.top, Spacing.lg)
                 Text("Can you tell us about yourself")
-                    .font(.title2)
+                    .font(AppFont.title2Regular)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 10)
+                    .padding(.top, Spacing.sm)
                 
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("Name (optional)")
                         .foregroundStyle(.gray)
                     
@@ -57,8 +57,8 @@ struct Onboarding1View: View {
                                     })
                                 )
                             Spacer()
-                            Image(systemName: "chevron.down")
-                                .foregroundStyle(Color.appSecondary.opacity(0.85))
+                            Image.chevronDown
+                                .foregroundStyle(Color.brandSecondary.opacity(0.85))
                         }
                     }
                     
@@ -66,7 +66,7 @@ struct Onboarding1View: View {
                         .frame(height: 1)
                         .foregroundStyle(.gray.opacity(0.3))
                 }
-                .padding(.top, 10)
+                .padding(.top, Spacing.sm)
                 
                 Spacer()
                 NavigationLink {
@@ -79,8 +79,8 @@ struct Onboarding1View: View {
                     Text("Next")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.appPrimary)
+                        .padding(.vertical, Spacing.md)
+                        .background(Color.brandPrimary)
                         .foregroundStyle(.white)
                         .clipShape(Capsule())
                 }
@@ -88,7 +88,7 @@ struct Onboarding1View: View {
             .padding()
             .navigationTitle("Onboarding")
             .navigationBarTitleDisplayMode(.inline)
-            .background(Color(.systemGroupedBackground))
+            .background(Color.bgPrimary)
         }
     }
 }

@@ -26,17 +26,29 @@ struct MainTabView: View {
         TabView {
             MissionHomeView(userName: userName, selectedDomain: interest, session: $session)
                 .tabItem {
-                    Label("Mission", systemImage: "target")
+                    Label {
+                        Text("Mission")
+                    } icon: {
+                        Image.mission
+                    }
                 }
 
             ListView(session: $session, selectedDomain: interest)
                 .tabItem {
-                    Label("List", systemImage: "list.bullet")
+                    Label {
+                        Text("List")
+                    } icon: {
+                        Image.list
+                    }
                 }
             
             SettingView()
                 .tabItem {
-                    Label("Setting", systemImage: "gearshape")
+                    Label {
+                        Text("Setting")
+                    } icon: {
+                        Image.settings
+                    }
                 }
         }
         .onChange(of: dailyGoal) { _, newGoal in

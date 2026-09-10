@@ -8,7 +8,6 @@
 
 /* Begin PBXFileReference section */
 		5EAF88442F88E2DD00A5AEE2 /* LearningSpeakingEnglish.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LearningSpeakingEnglish.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		7A4E9A1F2F88E2DE00A5AEE2 /* LearningSpeakingEnglish/Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = LearningSpeakingEnglish/Config.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -48,7 +47,6 @@
 			children = (
 				5EAF88462F88E2DD00A5AEE2 /* LearningSpeakingEnglish */,
 				5EAF88452F88E2DD00A5AEE2 /* Products */,
-				5EBE90F6304FF5360079A871 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,14 +56,6 @@
 				5EAF88442F88E2DD00A5AEE2 /* LearningSpeakingEnglish.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		5EBE90F6304FF5360079A871 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				7A4E9A1F2F88E2DE00A5AEE2 /* LearningSpeakingEnglish/Config.xcconfig */,
-			);
-			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -273,7 +263,6 @@
 		};
 		5EAF88502F88E2DE00A5AEE2 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7A4E9A1F2F88E2DE00A5AEE2 /* LearningSpeakingEnglish/Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -311,7 +300,6 @@
 		};
 		5EAF88512F88E2DE00A5AEE2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7A4E9A1F2F88E2DE00A5AEE2 /* LearningSpeakingEnglish/Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

@@ -38,7 +38,7 @@ struct LearningSpeakingEnglishApp: App {
                     }
                 }
             }
-            .tint(Color.appPrimary)
+            .tint(Color.brandPrimary)
             .preferredColorScheme(.light)
             .onAppear {
                 guard showSplash else { return }

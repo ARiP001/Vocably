@@ -26,12 +26,12 @@ struct VocabDetailView: View {
 
             if let vocab = session.currentVocab {
                 ScrollView {
-                    VStack(spacing: 20) {
+                    VStack(spacing: Spacing.lg) {
                         wordCard(vocab: vocab)
                         examplesCard(vocab: vocab)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 8)
+                    .padding(.top, Spacing.sm)
                     .padding(.bottom, 14)
                 }
             } else {
@@ -41,7 +41,7 @@ struct VocabDetailView: View {
 
             bottomActionBar
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .navigationTitle("Mission Detail")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
@@ -69,17 +69,17 @@ struct VocabDetailView: View {
     }
 
     private var headerSection: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: Spacing.sm) {
             HStack {
                 Text("Daily Progress")
-                    .font(.caption)
+                    .font(AppFont.caption1Regular)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
                 Text(session.progressText)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.appPrimary)
+                    .font(AppFont.caption1Semibold)
+                    .foregroundStyle(Color.brandPrimary)
             }
 
             RunnerProgressView(progress: session.progressValue)
@@ -87,25 +87,24 @@ struct VocabDetailView: View {
         }
         .padding(.horizontal, 6)
         .padding(.horizontal)
-        .padding(.top, 10)
+        .padding(.top, Spacing.sm)
     }
 
     private func wordCard(vocab: Vocab) -> some View {
-        VStack(spacing: 10) {
+        VStack(spacing: Spacing.sm) {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(vocab.nameEN)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
+                        .font(AppFont.largeTitleBold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     if isCurrentVocabLearned {
                         Text("Learned")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(Color.appPrimary)
+                            .font(AppFont.caption2Bold)
+                            .foregroundStyle(Color.brandPrimary)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.appPrimary.opacity(0.12))
+                            .background(Color.brandPrimary.opacity(0.12))
                             .clipShape(Capsule())
                     }
                 }
@@ -115,7 +114,7 @@ struct VocabDetailView: View {
                 Button("Skip") {
                     showSkipAlert = true
                 }
-                .font(.caption.weight(.semibold))
+                .font(AppFont.caption1Semibold)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
@@ -123,21 +122,19 @@ struct VocabDetailView: View {
                 .clipShape(Capsule())
             }
 
-            
-
             HStack {
                 Button {
                     SpeechHelper.speak(vocab.nameEN, languageCode: "en-US")
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: Spacing.sm) {
                         Text(vocab.pronoun)
-                            .font(.subheadline.weight(.medium))
-                        Image(systemName: "speaker.wave.2.fill")
+                            .font(AppFont.subheadMedium)
+                        Image.speaker
                     }
-                    .foregroundStyle(Color.appSecondary)
+                    .foregroundStyle(Color.brandSecondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color.appSecondary.opacity(0.12))
+                    .background(Color.brandSecondary.opacity(0.12))
                     .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
@@ -146,57 +143,58 @@ struct VocabDetailView: View {
             }
 
             Text(vocab.nameID)
-                .font(.title3.weight(.semibold))
+                .font(AppFont.title3Bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Divider()
                 .padding(.vertical, 2)
 
-            VStack(alignment: .leading, spacing: 10) {
-//                Text("Meaning")
-//                    .font(.headline)
-
+            VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text("(\(vocab.wordTypeEN)) \(vocab.meaningEN)")
+                    .font(AppFont.bodyRegular)
                     .foregroundStyle(.primary)
 
                 Text("(\(vocab.wordTypeID)) \(vocab.meaningID)")
+                    .font(AppFont.bodyRegular)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(Spacing.md)
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
     }
 
     private func examplesCard(vocab: Vocab) -> some View {
         let selectedExamples = vocab.examples(for: session.selectedInterest)
 
-        return VStack(alignment: .leading, spacing: 14) {
+        return VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Examples")
-                .font(.headline)
+                .font(AppFont.headlineRegular)
 
             ForEach(Array(selectedExamples.enumerated()), id: \.element.id) { index, example in
                 HStack(alignment: .top, spacing: 12) {
                     VStack(spacing: 6) {
                         Text("\(index + 1)")
-                            .font(.subheadline.weight(.semibold))
+                            .font(AppFont.subheadSemibold)
                         Button {
                             SpeechHelper.speak(example.exampleEN, languageCode: "en-US")
                         } label: {
-                            Image(systemName: "speaker.wave.2.fill")
+                            Image.speaker
                                 .frame(width: 28, height: 28)
                                 .glassEffect()
                                 .clipShape(Circle())
-                                .foregroundStyle(Color.appSecondary)
+                                .foregroundStyle(Color.brandSecondary)
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 5) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text(example.exampleEN)
+                            .font(AppFont.bodyRegular)
                             .fixedSize(horizontal: false, vertical: true)
 
                         Text(example.exampleID)
+                            .font(AppFont.bodyRegular)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -208,23 +206,13 @@ struct VocabDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(Spacing.md)
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
     }
 
     private var bottomActionBar: some View {
         HStack(spacing: 10) {
-//            NavigationLink {
-//                ListView(session: session)
-//            } label: {
-//                Image(systemName: "list.bullet")
-//                    .frame(width: 48, height: 48)
-//                    .glassEffect()
-//                    .clipShape(Circle())
-//                    .foregroundStyle(Color.appPrimary)
-//            }
-
             Button {
                 showLearningFlow = true
             } label: {
@@ -232,7 +220,7 @@ struct VocabDetailView: View {
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
-                    .background(Color.appPrimary)
+                    .background(Color.brandPrimary)
                     .foregroundStyle(.white)
                     .clipShape(Capsule())
             }
@@ -240,7 +228,7 @@ struct VocabDetailView: View {
         .padding(.horizontal)
         .padding(.top, 12)
         .padding(.bottom, 14)
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
     }
 }
 
@@ -261,17 +249,17 @@ struct RunnerProgressView: View {
                     .frame(height: 6)
 
                 Capsule()
-                    .fill(Color.appPrimary)
+                    .fill(Color.brandPrimary)
                     .frame(width: width * normalizedProgress, height: 6)
 
-                Image(systemName: "figure.run")
-                    .font(.caption.weight(.bold))
+                Image.run
+                    .font(AppFont.caption1Bold)
                     .offset(x: max(0, width * normalizedProgress - 9))
 
                 HStack {
                     Spacer()
-                    Image(systemName: "flag.fill")
-                        .font(.caption.weight(.bold))
+                    Image.flag
+                        .font(AppFont.caption1Bold)
                         .offset(x: 12)
                 }
             }

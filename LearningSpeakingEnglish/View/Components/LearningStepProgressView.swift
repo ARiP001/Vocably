@@ -18,23 +18,23 @@ struct LearningStepProgressView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Text("Learning Progress")
-                    .font(.subheadline.weight(.semibold))
+                    .font(AppFont.subheadSemibold)
                 Spacer()
                 Text("Step \(currentStep)/\(safeTotal)")
-                    .font(.caption.weight(.medium))
+                    .font(AppFont.caption1Medium)
                     .foregroundStyle(.secondary)
             }
 
             ProgressView(value: progressValue)
-                .tint(Color.appPrimary)
+                .tint(Color.brandPrimary)
                 .scaleEffect(x: 1, y: 1.4)
                 .animation(.easeInOut(duration: 0.35), value: progressValue)
         }
-        .padding(14)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(Spacing.md)
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
     }
 }

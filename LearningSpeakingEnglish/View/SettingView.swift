@@ -38,17 +38,17 @@ struct SettingView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
+            VStack(spacing: Spacing.lg) {
                 Image("man-reading-book")
                     .resizable()
                     .frame(width: 220, height: 220)
-                    .padding(.top, 20)
+                    .padding(.top, Spacing.lg)
                 Text("Can you tell us about yourself")
-                    .font(.title2)
+                    .font(AppFont.title2Regular)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 10)
+                    .padding(.top, Spacing.sm)
                 
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("Name (optional)")
                         .foregroundStyle(.gray)
                     
@@ -71,8 +71,8 @@ struct SettingView: View {
                             Text(draftInterest)
                                 .foregroundStyle(.black)
                             Spacer()
-                            Image(systemName: "chevron.down")
-                                .foregroundStyle(Color.appSecondary.opacity(0.85))
+                            Image.chevronDown
+                                .foregroundStyle(Color.brandSecondary.opacity(0.85))
                         }
                     }
 
@@ -91,22 +91,22 @@ struct SettingView: View {
                         .frame(height: 1)
                         .foregroundStyle(.gray.opacity(0.3))
                 }
-                .padding(.top, 10)
+                .padding(.top, Spacing.sm)
                 
                 Spacer()
                 Button {
                     saveAndClose()
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: Spacing.sm) {
                         if showSavedState {
-                            Image(systemName: "checkmark")
+                            Image.checkmark
                         }
                         Text(showSavedState ? "Saved" : "Confirm")
                     }
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(hasChanges ? Color.appPrimary : Color.gray.opacity(0.35))
+                        .padding(.vertical, Spacing.md)
+                        .background(hasChanges ? Color.brandPrimary : Color.gray.opacity(0.35))
                         .foregroundStyle(.white)
                         .clipShape(Capsule())
                 }
@@ -123,7 +123,7 @@ struct SettingView: View {
                     .foregroundStyle(.red)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.bgPrimary)
             .onAppear {
                 guard !hasLoadedInitialValue else { return }
                 draftName = userName

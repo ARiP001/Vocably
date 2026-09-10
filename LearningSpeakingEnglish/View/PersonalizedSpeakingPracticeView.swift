@@ -48,7 +48,7 @@ struct PersonalizedSpeakingPracticeView: View {
                 exerciseView
             }
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.bgPrimary)
         .navigationTitle(showSummary ? "Practice Result" : "Speaking Practice")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showRecordingSheet) {
@@ -78,34 +78,38 @@ struct PersonalizedSpeakingPracticeView: View {
     }
 
     private var exerciseView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Spacing.lg) {
             LearningStepProgressView(currentStep: currentStep + 1, totalSteps: 3)
                 .padding(.horizontal)
 
-            VStack(spacing: 14) {
+            VStack(spacing: Spacing.md) {
                 Text(currentStep == 0 ? "Say this word clearly" : "Practice this sentence")
-                    .font(.subheadline.weight(.medium))
+                    .font(AppFont.subheadMedium)
                     .foregroundStyle(.secondary)
                 coloredPromptText(prompt: currentPrompt, result: results[currentStep])
-                    .font(currentStep == 0 ? .system(size: 40, weight: .bold) : .title2.weight(.semibold))
+                    .font(currentStep == 0 ? .system(size: 40, weight: .bold) : AppFont.title2Bold)
                     .multilineTextAlignment(.center)
                 Button {
                     SpeechHelper.speak(currentPrompt)
                 } label: {
-                    Label("Listen", systemImage: "speaker.wave.2.fill")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color.appSecondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color.appSecondary.opacity(0.12))
-                        .clipShape(Capsule())
+                    Label {
+                        Text("Listen")
+                    } icon: {
+                        Image.speaker
+                    }
+                    .font(AppFont.subheadMedium)
+                    .foregroundStyle(Color.brandSecondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.brandSecondary.opacity(0.12))
+                    .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
             }
             .padding(20)
             .frame(maxWidth: .infinity)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 24))
+            .background(Color.bgSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
             .padding(.horizontal)
 
             if hasRecordedCurrentStep || isChecking {
@@ -118,15 +122,15 @@ struct PersonalizedSpeakingPracticeView: View {
             Button {
                 startRecording()
             } label: {
-                Image(systemName: "microphone")
+                Image.microphone
                     .font(.system(size: microphoneIsSecondary ? 25 : 38, weight: .medium))
                     .frame(width: microphoneIsSecondary ? 68 : 100, height: microphoneIsSecondary ? 68 : 100)
-                    .background(microphoneIsSecondary ? Color.white : Color.appPrimary)
+                    .background(microphoneIsSecondary ? Color.white : Color.brandPrimary)
                     .clipShape(Circle())
-                    .foregroundStyle(microphoneIsSecondary ? Color.appPrimary : Color.white)
+                    .foregroundStyle(microphoneIsSecondary ? Color.brandPrimary : Color.white)
                     .overlay {
                         if microphoneIsSecondary {
-                            Circle().stroke(Color.appPrimary.opacity(0.18), lineWidth: 1)
+                            Circle().stroke(Color.brandPrimary.opacity(0.18), lineWidth: 1)
                         }
                     }
             }
@@ -138,11 +142,15 @@ struct PersonalizedSpeakingPracticeView: View {
                             RecordingPlaybackHelper.play(url: url)
                         }
                     } label: {
-                        Label("Your attempt", systemImage: "waveform")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.white)
-                            .foregroundStyle(Color.appPrimary)
+                        Label {
+                            Text("Your attempt")
+                        } icon: {
+                            Image.waveform
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Spacing.md)
+                        .background(Color.white)
+                        .foregroundStyle(Color.brandPrimary)
                             .clipShape(Capsule())
                     }
 
@@ -150,12 +158,12 @@ struct PersonalizedSpeakingPracticeView: View {
                         advance()
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(microphoneIsSecondary ? Color.appPrimary : Color.white)
-                    .foregroundStyle(microphoneIsSecondary ? Color.white : Color.appPrimary)
+                    .padding(.vertical, Spacing.md)
+                    .background(microphoneIsSecondary ? Color.brandPrimary : Color.white)
+                    .foregroundStyle(microphoneIsSecondary ? Color.white : Color.brandPrimary)
                     .overlay {
                         if !microphoneIsSecondary {
-                            Capsule().stroke(Color.appPrimary.opacity(0.25), lineWidth: 1)
+                            Capsule().stroke(Color.brandPrimary.opacity(0.25), lineWidth: 1)
                         }
                     }
                     .clipShape(Capsule())
@@ -167,79 +175,87 @@ struct PersonalizedSpeakingPracticeView: View {
     }
 
     private var feedbackCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Text("Pronunciation check")
-                    .font(.subheadline.weight(.semibold))
+                    .font(AppFont.subheadSemibold)
                     .foregroundStyle(.secondary)
                 Spacer()
                 if isChecking {
                     ProgressView().controlSize(.small)
                 } else {
                     Text(scoreLabel(for: results[currentStep]))
-                        .font(.subheadline.weight(.semibold))
+                        .font(AppFont.subheadSemibold)
                         .foregroundStyle(results[currentStep].score.color)
                 }
             }
             if !results[currentStep].recognizedText.isEmpty {
                 Text("Detected: \(results[currentStep].recognizedText)")
-                    .font(.subheadline)
+                    .font(AppFont.subheadRegular)
                     .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
     }
 
     private var summaryView: some View {
         ScrollView {
-            VStack(spacing: 16) {
+            VStack(spacing: Spacing.md) {
                 Text("Listen and compare before you finish")
-                    .font(.subheadline)
+                    .font(AppFont.subheadRegular)
                     .foregroundStyle(.secondary)
 
                 ForEach(prompts.indices, id: \.self) { index in
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: Spacing.sm) {
                         Text(index == 0 ? "Word" : "Sentence \(index)")
-                            .font(.caption.weight(.semibold))
+                            .font(AppFont.caption1Semibold)
                             .foregroundStyle(.secondary)
                         coloredPromptText(prompt: prompts[index], result: results[index])
-                            .font(.headline)
-                        HStack(spacing: 10) {
+                            .font(AppFont.headlineRegular)
+                        HStack(spacing: Spacing.sm) {
                             Button {
-                                SpeechHelper.speak(prompts[index])
+                                 SpeechHelper.speak(prompts[index])
                             } label: {
-                                Label("Reference", systemImage: "play.fill")
-                                    .font(.subheadline.weight(.medium))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 13)
-                                    .background(Color.white)
-                                    .foregroundStyle(Color.appPrimary)
-                                    .clipShape(Capsule())
+                                Label {
+                                    Text("Reference")
+                                } icon: {
+                                    Image.play
+                                }
+                                .font(AppFont.subheadMedium)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 13)
+                                .background(Color.white)
+                                .foregroundStyle(Color.brandPrimary)
+                                .clipShape(Capsule())
                             }
 
                             Button {
                                 if let url = recordingURLs[index] { RecordingPlaybackHelper.play(url: url) }
                             } label: {
-                                Label("Your attempt", systemImage: "waveform")
-                                    .font(.subheadline.weight(.medium))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 13)
-                                    .background(Color.appPrimary)
-                                    .foregroundStyle(.white)
-                                    .clipShape(Capsule())
+                                Label {
+                                    Text("Your attempt")
+                                } icon: {
+                                    Image.waveform
+                                }
+                                .font(AppFont.subheadMedium)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 13)
+                                .background(Color.brandPrimary)
+                                .foregroundStyle(.white)
+                                .clipShape(Capsule())
                             }
                         }
                         Text(scoreLabel(for: results[index]))
-                            .font(.caption.weight(.semibold))
+                            .font(AppFont.caption1Semibold)
                             .foregroundStyle(results[index].score.color)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(16)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .padding(Spacing.md)
+                    .background(Color.bgSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
                 }
 
                 Button("Finish") {
@@ -249,8 +265,8 @@ struct PersonalizedSpeakingPracticeView: View {
                 }
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.appPrimary)
+                .padding(.vertical, Spacing.md)
+                .background(Color.brandPrimary)
                 .foregroundStyle(.white)
                 .clipShape(Capsule())
             }

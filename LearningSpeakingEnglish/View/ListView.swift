@@ -29,9 +29,10 @@ struct ListView: View {
         NavigationStack {
             Group {
                 if vocabulary.isEmpty {
-                    VStack(spacing: 12) {
+                    VStack(spacing: Spacing.md) {
                         ProgressView()
                         Text("Loading vocabulary…")
+                            .font(AppFont.subheadRegular)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -45,18 +46,18 @@ struct ListView: View {
                                 session.finishLearning(named: item.vocabulary.word)
                             }
                         } label: {
-                            VStack(alignment: .leading, spacing: 5) {
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
                                 HStack {
                                     Text(item.vocabulary.word)
-                                        .font(.headline)
+                                        .font(AppFont.headlineRegular)
                                     Spacer()
                                     if isLearned(item.vocabulary) {
                                         Text("Learned")
-                                            .font(.caption.weight(.semibold))
-                                            .foregroundStyle(Color.appPrimary)
+                                            .font(AppFont.caption1Semibold)
+                                            .foregroundStyle(Color.brandPrimary)
                                             .padding(.horizontal, 7)
                                             .padding(.vertical, 3)
-                                            .background(Color.appPrimary.opacity(0.12))
+                                            .background(Color.brandPrimary.opacity(0.12))
                                             .clipShape(Capsule())
                                     }
                                 }
@@ -66,7 +67,7 @@ struct ListView: View {
                                     Text("•")
                                     Text(item.vocabulary.domain.isEmpty ? "General" : item.vocabulary.domain.joined(separator: ", "))
                                 }
-                                .font(.subheadline)
+                                .font(AppFont.subheadRegular)
                                 .foregroundStyle(.secondary)
                             }
                             .padding(.vertical, 4)

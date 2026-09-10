@@ -23,7 +23,7 @@ struct MissionHomeView: View {
         NavigationStack {
 
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: Spacing.md) {
                     greetingCard
                     if hasCompletedDailyTarget {
                         completionBanner
@@ -33,7 +33,7 @@ struct MissionHomeView: View {
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.bgPrimary)
             .navigationTitle("Mission")
             .navigationBarTitleDisplayMode(.inline)
             .task(id: selectedDomain) {
@@ -52,82 +52,82 @@ struct MissionHomeView: View {
     private var greetingCard: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Welcome back")
-                .font(.caption)
+                .font(AppFont.caption1Regular)
                 .foregroundStyle(.secondary)
 
             Text(displayName)
-                .font(.title3.weight(.semibold))
+                .font(AppFont.title3Bold)
                 .foregroundStyle(.primary)
 
             Text("Ready for your mission today?")
-                .font(.subheadline)
+                .font(AppFont.subheadRegular)
                 .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Spacing.md)
         .padding(.top, -20)
-        .padding(.bottom, 16)
+        .padding(.bottom, Spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var progressCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Text("Daily Progress")
-                    .font(.subheadline.weight(.semibold))
+                    .font(AppFont.subheadSemibold)
                 Spacer()
                 Text(session.progressText)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.appPrimary)
+                    .font(AppFont.subheadSemibold)
+                    .foregroundStyle(Color.brandPrimary)
             }
 
             RunnerProgressView(progress: session.progressValue)
                 .frame(height: 15)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
+        .padding(Spacing.md)
         .background(
             hasCompletedDailyTarget
-            ? Color.appPrimary.opacity(0.12)
-            : Color(.secondarySystemGroupedBackground)
+            ? Color.brandPrimary.opacity(0.12)
+            : Color.bgSecondary
         )
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
     }
     
     private var completionBanner: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "party.popper.fill")
-                .foregroundStyle(Color.appSecondary)
+        HStack(spacing: Spacing.sm) {
+            Image.partyPopper
+                .foregroundStyle(Color.brandSecondary)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("Congratulations!")
-                    .font(.subheadline.weight(.bold))
+                    .font(AppFont.subheadSemibold)
                 Text("You hit your daily vocab target.")
-                    .font(.caption)
+                    .font(AppFont.caption1Regular)
                     .foregroundStyle(.secondary)
             }
             
             Spacer()
         }
         .padding(14)
-        .background(Color.appPrimary.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .background(Color.brandPrimary.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
     }
 
     private var missionCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Today's Mission")
-                .font(.headline)
+                .font(AppFont.headlineRegular)
 
             if let vocab = recommendedVocabulary {
                 HStack(alignment: .top, spacing: 12) {
                     Text(vocab.word)
-                        .font(.title.weight(.bold))
+                        .font(AppFont.title1Bold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Button("Skip") {
                         recommendNext(excluding: vocab.id)
                     }
-                    .font(.caption.weight(.semibold))
+                    .font(AppFont.caption1Semibold)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -139,15 +139,15 @@ struct MissionHomeView: View {
                     Button {
                         SpeechHelper.speak(vocab.word, languageCode: "en-US")
                     } label: {
-                        HStack(spacing: 8) {
+                        HStack(spacing: Spacing.sm) {
                             Text(vocab.pronunciation?.ipa ?? "Listen")
-                                .font(.subheadline.weight(.medium))
-                            Image(systemName: "speaker.wave.2.fill")
+                                .font(AppFont.subheadMedium)
+                            Image.speaker
                         }
-                        .foregroundStyle(Color.appSecondary)
+                        .foregroundStyle(Color.brandSecondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(Color.appSecondary.opacity(0.12))
+                        .background(Color.brandSecondary.opacity(0.12))
                         .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -156,6 +156,7 @@ struct MissionHomeView: View {
                 }
 
                 Text(vocab.allDefinitions.first?.description ?? "Vocabulary practice")
+                    .font(AppFont.subheadRegular)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -172,7 +173,7 @@ struct MissionHomeView: View {
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 13)
-                        .background(Color.appPrimary)
+                        .background(Color.brandPrimary)
                         .foregroundStyle(.white)
                         .clipShape(Capsule())
                 }
@@ -181,9 +182,9 @@ struct MissionHomeView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .padding(Spacing.md)
+        .background(Color.bgSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: Radius.md))
     }
 
     private var displayName: String {

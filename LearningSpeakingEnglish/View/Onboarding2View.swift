@@ -15,21 +15,16 @@ struct Onboarding2View: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-//                Text("Onboarding")
-//                    .font(.title2)
-//                    .fontWeight(.medium)
-
+            VStack(spacing: Spacing.lg) {
                 ProgressView(value: 1)
-                    .tint(Color.appPrimary)
+                    .tint(Color.brandPrimary)
                     .scaleEffect(x: 1, y: 2)
-    //                .padding(.vertical, 10)
                 
                 Divider()
                 Text("How many Vocab you\nwant to learn per day ?")
-                    .font(.title2)
+                    .font(AppFont.title2Regular)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 30)
+                    .padding(.top, Spacing.xl)
                 HStack(spacing: 60) {
                     
                     Button {
@@ -39,14 +34,14 @@ struct Onboarding2View: View {
                     } label: {
                         Text("-")
                             .font(.system(size: 50, weight: .light))
-                            .foregroundStyle(Color.appSecondary)
+                            .foregroundStyle(Color.brandSecondary)
                     }
                     
-                    VStack(spacing: 5) {
+                    VStack(spacing: Spacing.xs) {
                         Text("\(numberVocab)")
                             .font(.system(size: 70, weight: .medium))
                         Rectangle()
-                            .fill(Color.appPrimary.opacity(0.35))
+                            .fill(Color.brandPrimary.opacity(0.35))
                             .frame(width: 40, height: 2)
                     }
                     
@@ -55,12 +50,12 @@ struct Onboarding2View: View {
                     } label: {
                         Text("+")
                             .font(.system(size: 50, weight: .light))
-                            .foregroundStyle(Color.appSecondary)
+                            .foregroundStyle(Color.brandSecondary)
                     }
                 }
-                .padding(.vertical, 40)
+                .padding(.vertical, Spacing.xxl)
                 Text("Tips : It's recommended to start low")
-                    .font(.body)
+                    .font(AppFont.bodyRegular)
                     .foregroundStyle(.gray)
                 
                 Spacer()
@@ -70,8 +65,8 @@ struct Onboarding2View: View {
                     Text("Get started")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.appPrimary)
+                        .padding(.vertical, Spacing.md)
+                        .background(Color.brandPrimary)
                         .foregroundStyle(.white)
                         .clipShape(Capsule())
                 }
@@ -79,7 +74,7 @@ struct Onboarding2View: View {
             .padding()
             .navigationTitle("Onboarding")
             .navigationBarTitleDisplayMode(.inline)
-            .background(Color(.systemGroupedBackground))
+            .background(Color.bgPrimary)
         }
     }
 }

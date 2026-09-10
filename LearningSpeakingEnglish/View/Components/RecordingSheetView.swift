@@ -13,28 +13,27 @@ struct RecordingSheetView: View {
     let onStopRecording: () -> Void
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Spacing.lg) {
             Capsule()
                 .fill(.gray.opacity(0.35))
                 .frame(width: 42, height: 5)
-                .padding(.top, 8)
+                .padding(.top, Spacing.sm)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(recordingTitle)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(AppFont.title2Bold)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(recordingHint)
-                    .font(.subheadline)
+                    .font(AppFont.subheadRegular)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
-            .padding(.top, 4)
+            .padding(.top, Spacing.xs)
 
-            VStack(spacing: 10) {
+            VStack(spacing: Spacing.sm) {
                 Text(formattedSeconds(recordingSeconds))
                     .font(.title3.monospacedDigit())
                     .foregroundStyle(.black)
@@ -46,7 +45,7 @@ struct RecordingSheetView: View {
                         let height = CGFloat(base + extra)
 
                         Capsule()
-                            .fill(Color.appPrimary.opacity(0.35 + Double(i) * 0.07))
+                            .fill(Color.brandPrimary.opacity(0.35 + Double(i) * 0.07))
                             .frame(width: 7, height: height)
                     }
                 }
@@ -57,11 +56,11 @@ struct RecordingSheetView: View {
             Button {
                 onStopRecording()
             } label: {
-                Image(systemName: "stop.fill")
-                    .font(.title2.weight(.bold))
+                Image.stop
+                    .font(AppFont.title2Bold)
                     .foregroundStyle(.white)
                     .frame(width: 72, height: 72)
-                    .background(Color.appSecondary)
+                    .background(Color.brandSecondary)
                     .clipShape(Circle())
             }
 
