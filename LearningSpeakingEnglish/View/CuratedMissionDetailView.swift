@@ -44,7 +44,7 @@ struct CuratedMissionDetailView: View {
                     definitionCard(definition, index: index)
                 }
 
-                Button("See More") {
+                Button("See More Definitions") {
                     showFullDetails = true
                 }
                 .font(.subheadline.weight(.semibold))
@@ -71,6 +71,7 @@ struct CuratedMissionDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Mission Detail")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .navigationDestination(isPresented: $showFullDetails) {
             FullVocabularyDetailView(vocabulary: vocabulary)
         }
@@ -270,44 +271,141 @@ struct FullVocabularyDetailView: View {
     let vocabulary: RecommendedVocabulary
 
     var body: some View {
-        List {
-            Section {
-                if let ipa = vocabulary.pronunciation?.ipa {
-                    Label(ipa, systemImage: "speaker.wave.2.fill")
-                        .foregroundStyle(Color.appSecondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                headerCard
+
+                ForEach(Array(vocabulary.allDefinitions.enumerated()), id: \.offset) { index, definition in
+                    definitionCard(definition, index: index)
                 }
-                Text("\(vocabulary.partOfSpeech) • \(vocabulary.cefrLevel)")
-                    .foregroundStyle(.secondary)
-                if vocabulary.domain.isEmpty {
-                    Text("General vocabulary")
+            }
+            .padding(16)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(vocabulary.word)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var headerCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(vocabulary.word)
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                    Text(vocabulary.partOfSpeech.capitalized)
+                        .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Text(vocabulary.cefrLevel)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.appPrimary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(Color.appPrimary.opacity(0.12))
+                    .clipShape(Capsule())
+            }
+
+            HStack(spacing: 10) {
+                if let ipa = vocabulary.pronunciation?.ipa, !ipa.isEmpty {
+                    Button {
+                        SpeechHelper.speak(vocabulary.word, languageCode: "en-US")
+                    } label: {
+                        Label(ipa, systemImage: "speaker.wave.2.fill")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color.appSecondary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 9)
+                            .background(Color.appSecondary.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if vocabulary.domain.isEmpty {
+                    metadataBadge("General", icon: "globe")
                 } else {
-                    Text(vocabulary.domain.joined(separator: ", "))
+                    metadataBadge(vocabulary.domain.joined(separator: " • "), icon: "square.grid.2x2")
+                }
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private func metadataBadge(_ text: String, icon: String) -> some View {
+        Label(text, systemImage: icon)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(Color(.tertiarySystemGroupedBackground))
+            .clipShape(Capsule())
+    }
+
+    private func definitionCard(_ definition: RecommendedDefinition, index: Int) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Text("Meaning \(index + 1)")
+                    .font(.headline)
+                Spacer()
+                if let cefr = definition.cefr, !cefr.isEmpty {
+                    Text(cefr)
+                        .font(.caption.weight(.bold))
                         .foregroundStyle(.secondary)
                 }
             }
 
-            ForEach(Array(vocabulary.allDefinitions.enumerated()), id: \.offset) { index, definition in
-                Section("Meaning \(index + 1)") {
-                    if let label = definition.label {
-                        Text(label)
-                            .italic()
-                            .foregroundStyle(.secondary)
-                    }
-                    if let description = definition.description {
-                        Text(description)
-                    }
-                    if let examples = definition.examples, !examples.isEmpty {
-                        ForEach(examples, id: \.self) { example in
+            if let label = definition.label, !label.isEmpty {
+                Text(label)
+                    .font(.subheadline.weight(.semibold))
+                    .italic()
+                    .foregroundStyle(Color.appSecondary)
+            }
+
+            if let description = definition.description, !description.isEmpty {
+                Text(description)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if let examples = definition.examples, !examples.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Examples")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
+
+                    ForEach(examples, id: \.self) { example in
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "quote.opening")
+                                .font(.caption)
+                                .foregroundStyle(Color.appSecondary)
                             Text(example)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }
+                .padding(12)
+                .background(Color.appSecondary.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
         }
-        .navigationTitle(vocabulary.word)
-        .navigationBarTitleDisplayMode(.inline)
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color.appPrimary)
+                .frame(width: 4)
+                .padding(.vertical, 18)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }

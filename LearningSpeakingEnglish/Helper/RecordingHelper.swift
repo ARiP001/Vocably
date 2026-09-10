@@ -46,6 +46,7 @@ enum RecordingHelper {
         recorder.prepareToRecord()
         return recorder
     }
+
 }
 
 /// Plays previously saved user recordings.

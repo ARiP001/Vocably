@@ -44,6 +44,7 @@ struct VocabDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Mission Detail")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .alert("Skip this word?", isPresented: $showSkipAlert) {
             Button("Cancel", role: .cancel) {
             }
@@ -55,13 +56,15 @@ struct VocabDetailView: View {
         }
         .fullScreenCover(isPresented: $showLearningFlow) {
             NavigationStack {
-                LearnVocabView(session: $session) {
-                    showLearningFlow = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                PersonalizedSpeakingPracticeView(
+                    word: session.currentVocab?.nameEN ?? "Vocabulary",
+                    sentences: session.currentExamples.map(\.exampleEN),
+                    onFinished: {
+                        session.finishCurrentLearning()
+                        showLearningFlow = false
                         dismiss()
                     }
-                }
-            }
+           ) }
         }
     }
 
@@ -221,18 +224,6 @@ struct VocabDetailView: View {
 //                    .clipShape(Circle())
 //                    .foregroundStyle(Color.appPrimary)
 //            }
-
-            if isCurrentVocabLearned {
-                NavigationLink {
-                    CompareView(session: $session)
-                } label: {
-                    Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
-                        .frame(width: 48, height: 48)
-                        .glassEffect()
-                        .clipShape(Circle())
-                        .foregroundStyle(Color.appSecondary)
-                }
-            }
 
             Button {
                 showLearningFlow = true

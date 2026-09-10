@@ -83004,38 +83004,6 @@
     ]
   },
   {
-    "word": "metal",
-    "cefrLevel": "A2",
-    "partOfSpeech": "noun",
-    "subtlwf": 19.45098039215686,
-    "frequencyRank": 1493,
-    "normalizedRank": 0.65471,
-    "domain": [
-      "Engineering"
-    ],
-    "pronunciation": {
-      "ipa": "/ˈmetl/"
-    },
-    "definitions": [
-      {
-        "definitions": [
-          {
-            "description": "(to go) at full speed; (to drive) with the accelerator of the car pressed to the floor",
-            "examples": [
-              "We drove through the night flat-out, with the pedal to the metal. "
-            ]
-          },
-          {
-            "description": "to use as much effort as possible; with as much effort as possible",
-            "examples": [
-              "I'm still putting the pedal to the metal here at work."
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
     "word": "method",
     "cefrLevel": "A2",
     "partOfSpeech": "noun",

@@ -39,6 +39,7 @@ struct LearningSpeakingEnglishApp: App {
                 }
             }
             .tint(Color.appPrimary)
+            .preferredColorScheme(.light)
             .onAppear {
                 guard showSplash else { return }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {

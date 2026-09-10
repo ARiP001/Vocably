@@ -33,6 +33,13 @@ struct PersonalizedSpeakingPracticeView: View {
     private var currentPrompt: String { prompts[currentStep] }
     private var hasRecordedCurrentStep: Bool { recordingURLs[currentStep] != nil }
 
+    private var microphoneIsSecondary: Bool {
+        guard hasRecordedCurrentStep, !isChecking else { return false }
+        let result = results[currentStep]
+        guard let score = result.percentage, score >= 85 else { return false }
+        return result.words.allSatisfy { $0.score >= 80 }
+    }
+
     var body: some View {
         Group {
             if showSummary {
@@ -112,11 +119,16 @@ struct PersonalizedSpeakingPracticeView: View {
                 startRecording()
             } label: {
                 Image(systemName: "microphone")
-                    .font(.largeTitle)
-                    .frame(width: 100, height: 100)
-                    .background(Color.appPrimary)
+                    .font(.system(size: microphoneIsSecondary ? 25 : 38, weight: .medium))
+                    .frame(width: microphoneIsSecondary ? 68 : 100, height: microphoneIsSecondary ? 68 : 100)
+                    .background(microphoneIsSecondary ? Color.white : Color.appPrimary)
                     .clipShape(Circle())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(microphoneIsSecondary ? Color.appPrimary : Color.white)
+                    .overlay {
+                        if microphoneIsSecondary {
+                            Circle().stroke(Color.appPrimary.opacity(0.18), lineWidth: 1)
+                        }
+                    }
             }
 
             if hasRecordedCurrentStep {
@@ -129,18 +141,23 @@ struct PersonalizedSpeakingPracticeView: View {
                         Label("Your attempt", systemImage: "waveform")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(Color(.secondarySystemGroupedBackground))
+                            .background(Color.white)
                             .foregroundStyle(Color.appPrimary)
                             .clipShape(Capsule())
                     }
 
-                    Button(currentStep == 2 ? "Compare" : "Next") {
+                    Button("Next") {
                         advance()
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.appPrimary)
-                    .foregroundStyle(.white)
+                    .background(microphoneIsSecondary ? Color.appPrimary : Color.white)
+                    .foregroundStyle(microphoneIsSecondary ? Color.white : Color.appPrimary)
+                    .overlay {
+                        if !microphoneIsSecondary {
+                            Capsule().stroke(Color.appPrimary.opacity(0.25), lineWidth: 1)
+                        }
+                    }
                     .clipShape(Capsule())
                 }
                 .padding(.horizontal)
@@ -190,14 +207,31 @@ struct PersonalizedSpeakingPracticeView: View {
                             .foregroundStyle(.secondary)
                         coloredPromptText(prompt: prompts[index], result: results[index])
                             .font(.headline)
-                        HStack {
-                            Button("Reference") { SpeechHelper.speak(prompts[index]) }
-                            Spacer()
-                            Button("Your attempt") {
+                        HStack(spacing: 10) {
+                            Button {
+                                SpeechHelper.speak(prompts[index])
+                            } label: {
+                                Label("Reference", systemImage: "play.fill")
+                                    .font(.subheadline.weight(.medium))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 13)
+                                    .background(Color.white)
+                                    .foregroundStyle(Color.appPrimary)
+                                    .clipShape(Capsule())
+                            }
+
+                            Button {
                                 if let url = recordingURLs[index] { RecordingPlaybackHelper.play(url: url) }
+                            } label: {
+                                Label("Your attempt", systemImage: "waveform")
+                                    .font(.subheadline.weight(.medium))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 13)
+                                    .background(Color.appPrimary)
+                                    .foregroundStyle(.white)
+                                    .clipShape(Capsule())
                             }
                         }
-                        .foregroundStyle(Color.appPrimary)
                         Text(scoreLabel(for: results[index]))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(results[index].score.color)
@@ -300,7 +334,10 @@ struct PersonalizedSpeakingPracticeView: View {
             let (index, word) = element
             let color = wordColor(for: index, promptWord: word, result: result)
             let styledWord = Text(word).foregroundColor(color)
-            return output + (index == 0 ? styledWord : Text(" ") + styledWord)
+            if index == 0 {
+                return Text("\(styledWord)")
+            }
+            return Text("\(output) \(styledWord)")
         }
     }
 
