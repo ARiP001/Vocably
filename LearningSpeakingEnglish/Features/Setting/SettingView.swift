@@ -156,7 +156,8 @@ struct SettingView: View {
             showSavedState = true
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(0.9))
             dismiss()
         }
     }

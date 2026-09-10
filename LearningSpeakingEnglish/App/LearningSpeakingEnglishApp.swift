@@ -40,12 +40,11 @@ struct LearningSpeakingEnglishApp: App {
             }
             .tint(Color.brandPrimary)
             .preferredColorScheme(.light)
-            .onAppear {
+            .task {
                 guard showSplash else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
-                    withAnimation(.easeOut(duration: 0.25)) {
-                        showSplash = false
-                    }
+                try? await Task.sleep(for: .seconds(1.3))
+                withAnimation(.easeOut(duration: 0.25)) {
+                    showSplash = false
                 }
             }
         }

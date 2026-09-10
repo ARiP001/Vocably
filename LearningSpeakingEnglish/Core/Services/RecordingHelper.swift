@@ -9,17 +9,9 @@ import AVFoundation
 enum RecordingHelper {
     /// Requests microphone access and returns the result on main thread.
     static func requestMicrophonePermission(_ completion: @escaping (Bool) -> Void) {
-        if #available(iOS 17.0, *) {
-            AVAudioApplication.requestRecordPermission { granted in
-                DispatchQueue.main.async {
-                    completion(granted)
-                }
-            }
-        } else {
-            AVAudioSession.sharedInstance().requestRecordPermission { granted in
-                DispatchQueue.main.async {
-                    completion(granted)
-                }
+        AVAudioApplication.requestRecordPermission { granted in
+            DispatchQueue.main.async {
+                completion(granted)
             }
         }
     }

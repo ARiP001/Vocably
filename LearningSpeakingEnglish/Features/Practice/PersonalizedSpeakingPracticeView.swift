@@ -349,7 +349,7 @@ struct PersonalizedSpeakingPracticeView: View {
         return words.enumerated().reduce(Text("")) { output, element in
             let (index, word) = element
             let color = wordColor(for: index, promptWord: word, result: result)
-            let styledWord = Text(word).foregroundColor(color)
+            let styledWord = Text(word).foregroundStyle(color)
             if index == 0 {
                 return Text("\(styledWord)")
             }
