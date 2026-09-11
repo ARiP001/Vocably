@@ -1,0 +1,53 @@
+//
+//  PersonalizedVocabularyCache.swift
+//  LearningSpeakingEnglish
+//
+//  Created by Arif Fathurrahman on 11/09/26.
+//
+
+import Foundation
+import SwiftData
+
+/// SwiftData cache for content generated from the bundled dictionary record.
+@Model
+final class PersonalizedVocabularyCache {
+    var cacheKey: String
+    var word: String
+    var domain: String
+    var promptVersion: String
+    var modelVersion: String
+    var selectedDefinitionIndexesCSV: String
+    var generatedExamplesJSON: String
+    var translationJSON: String
+    var generatedAt: Date
+
+    init(
+        cacheKey: String,
+        word: String,
+        domain: String,
+        promptVersion: String,
+        modelVersion: String,
+        selectedDefinitionIndexesCSV: String,
+        generatedExamplesJSON: String,
+        translationJSON: String,
+        generatedAt: Date = .now
+    ) {
+        self.cacheKey = cacheKey
+        self.word = word
+        self.domain = domain
+        self.promptVersion = promptVersion
+        self.modelVersion = modelVersion
+        self.selectedDefinitionIndexesCSV = selectedDefinitionIndexesCSV
+        self.generatedExamplesJSON = generatedExamplesJSON
+        self.translationJSON = translationJSON
+        self.generatedAt = generatedAt
+    }
+}
+
+/// DTO representing serialized translation data in cache storage.
+struct CachedIndonesianTranslation: Codable {
+    let word: String
+    let partOfSpeech: String
+    let definitions: [String]
+    let examples: [[String]]
+}
