@@ -21,39 +21,38 @@ struct PersonalizedSpeakingPracticeView: View {
     }
 
     var body: some View {
-        Group {
-            if viewModel.showSummary {
-                summaryView
-            } else {
-                exerciseView
+        exerciseView
+            .background(Color.bgPrimary)
+            .navigationTitle("Speaking Practice")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $viewModel.showSummary) {
+                SpeakingPracticeSummaryView(viewModel: viewModel) {
+                    dismiss()
+                }
             }
-        }
-        .background(Color.bgPrimary)
-        .navigationTitle(viewModel.showSummary ? "Practice Result" : "Speaking Practice")
-        .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $viewModel.showRecordingSheet) {
-            RecordingSheetView(
-                showRecordingSheet: $viewModel.showRecordingSheet,
-                recordingTitle: "Recording step \(viewModel.currentStep + 1)",
-                recordingHint: "Speak naturally and clearly",
-                recordingSeconds: viewModel.recordingSeconds,
-                onStopRecording: viewModel.stopRecording
-            )
-            .presentationDetents([.height(300)])
-            .presentationDragIndicator(.visible)
-            .interactiveDismissDisabled(true)
-        }
-        .alert("Pronunciation check failed", isPresented: Binding(
-            get: { viewModel.pronunciationError != nil },
-            set: { if !$0 { viewModel.pronunciationError = nil } }
-        )) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(viewModel.pronunciationError ?? "Please try recording again.")
-        }
-        .onDisappear {
-            viewModel.cancelAssessment()
-        }
+            .sheet(isPresented: $viewModel.showRecordingSheet) {
+                RecordingSheetView(
+                    showRecordingSheet: $viewModel.showRecordingSheet,
+                    recordingTitle: "Recording step \(viewModel.currentStep + 1)",
+                    recordingHint: "Speak naturally and clearly",
+                    recordingSeconds: viewModel.recordingSeconds,
+                    onStopRecording: viewModel.stopRecording
+                )
+                .presentationDetents([.height(300)])
+                .presentationDragIndicator(.visible)
+                .interactiveDismissDisabled(true)
+            }
+            .alert("Pronunciation check failed", isPresented: Binding(
+                get: { viewModel.pronunciationError != nil },
+                set: { if !$0 { viewModel.pronunciationError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(viewModel.pronunciationError ?? "Please try recording again.")
+            }
+            .onDisappear {
+                viewModel.cancelAssessment()
+            }
     }
 
     private var exerciseView: some View {
@@ -65,7 +64,7 @@ struct PersonalizedSpeakingPracticeView: View {
                 Text(viewModel.currentStep == 0 ? "Say this word clearly" : "Practice this sentence")
                     .font(.subheadMedium)
                     .foregroundStyle(.secondary)
-                coloredPromptText(prompt: viewModel.currentPrompt, result: viewModel.results[viewModel.currentStep])
+                viewModel.coloredPromptText(prompt: viewModel.currentPrompt, result: viewModel.results[viewModel.currentStep])
                     .font(viewModel.currentStep == 0 ? .largeTitleBold : .title2Bold)
                     .multilineTextAlignment(.center)
                 Button {
@@ -176,90 +175,5 @@ struct PersonalizedSpeakingPracticeView: View {
         .padding(14)
         .background(Color.bgSecondary)
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-    }
-
-    private var summaryView: some View {
-        ScrollView {
-            VStack(spacing: Spacing.md) {
-                Text("Listen and compare before you finish")
-                    .font(.subheadRegular)
-                    .foregroundStyle(.secondary)
-
-                ForEach(viewModel.prompts.indices, id: \.self) { index in
-                    VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text(index == 0 ? "Word" : "Sentence \(index)")
-                            .font(.caption1Semibold)
-                            .foregroundStyle(.secondary)
-                        coloredPromptText(prompt: viewModel.prompts[index], result: viewModel.results[index])
-                            .font(.headlineRegular)
-                        HStack(spacing: Spacing.sm) {
-                            Button {
-                                viewModel.playReferenceAudio(for: viewModel.prompts[index])
-                            } label: {
-                                Label {
-                                    Text("Reference")
-                                } icon: {
-                                    Image.play
-                                }
-                                .font(.subheadMedium)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 13)
-                                .background(Color.white)
-                                .foregroundStyle(Color.brandPrimary)
-                                .clipShape(Capsule())
-                            }
-
-                            Button {
-                                viewModel.playUserAttempt(at: index)
-                            } label: {
-                                Label {
-                                    Text("Your attempt")
-                                } icon: {
-                                    Image.waveform
-                                }
-                                .font(.subheadMedium)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 13)
-                                .background(Color.brandPrimary)
-                                .foregroundStyle(Color.white)
-                                .clipShape(Capsule())
-                            }
-                        }
-                        Text(viewModel.scoreLabel(for: viewModel.results[index]))
-                            .font(.caption1Semibold)
-                            .foregroundStyle(viewModel.results[index].score.color)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(Spacing.md)
-                    .background(Color.bgSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-                }
-
-                Button("Finish") {
-                    viewModel.finishPractice()
-                    dismiss()
-                }
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.md)
-                .background(Color.brandPrimary)
-                .foregroundStyle(.white)
-                .clipShape(Capsule())
-            }
-            .padding()
-        }
-    }
-
-    private func coloredPromptText(prompt: String, result: PronunciationResult) -> Text {
-        let words = prompt.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
-        return words.enumerated().reduce(Text("")) { output, element in
-            let (index, word) = element
-            let color = viewModel.wordColor(for: index, promptWord: word, result: result)
-            let styledWord = Text(word).foregroundStyle(color)
-            if index == 0 {
-                return Text("\(styledWord)")
-            }
-            return Text("\(output) \(styledWord)")
-        }
     }
 }

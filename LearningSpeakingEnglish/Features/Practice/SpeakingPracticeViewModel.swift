@@ -131,6 +131,19 @@ final class SpeakingPracticeViewModel {
         return PronunciationWordResult(word: promptWord, score: percentage).color
     }
 
+    func coloredPromptText(prompt: String, result: PronunciationResult) -> Text {
+        let words = prompt.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        return words.enumerated().reduce(Text("")) { output, element in
+            let (index, word) = element
+            let color = wordColor(for: index, promptWord: word, result: result)
+            let styledWord = Text(word).foregroundStyle(color)
+            if index == 0 {
+                return Text("\(styledWord)")
+            }
+            return Text("\(output) \(styledWord)")
+        }
+    }
+
     private func analyze(url: URL, step: Int) {
         isChecking = true
         assessmentTask?.cancel()

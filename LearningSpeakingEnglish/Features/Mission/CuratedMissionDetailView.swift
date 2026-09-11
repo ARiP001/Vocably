@@ -14,11 +14,7 @@ struct CuratedMissionDetailView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query private var personalizationCaches: [PersonalizedVocabularyCache]
-    @State private var content: PersonalizedVocabularyContent
-    @State private var showFullDetails = false
-    @State private var showSpeakingPractice = false
-    @State private var personalizationStatus: PersonalizationStatus = .loading
-    @State private var showPersonalizationAlert = false
+    @State private var viewModel: CuratedMissionDetailViewModel
 
     init(
         vocabulary: RecommendedVocabulary,
@@ -28,7 +24,7 @@ struct CuratedMissionDetailView: View {
         self.vocabulary = vocabulary
         self.selectedDomain = selectedDomain
         self.onFinished = onFinished
-        _content = State(initialValue: .fallback(for: vocabulary))
+        _viewModel = State(initialValue: CuratedMissionDetailViewModel(vocabulary: vocabulary))
     }
 
     var body: some View {
@@ -36,16 +32,16 @@ struct CuratedMissionDetailView: View {
             VStack(spacing: 16) {
                 vocabularyCard
 
-                if personalizationStatus == .loading {
+                if viewModel.personalizationStatus == .loading {
                     personalizationLoadingCard
                 }
 
-                ForEach(Array(content.definitions.enumerated()), id: \.offset) { index, definition in
+                ForEach(Array(viewModel.content.definitions.enumerated()), id: \.offset) { index, definition in
                     definitionCard(definition, index: index)
                 }
 
                 Button("See More Definitions") {
-                    showFullDetails = true
+                    viewModel.showFullDetails = true
                 }
                 .font(.subheadSemibold)
                 .frame(maxWidth: .infinity)
@@ -55,7 +51,7 @@ struct CuratedMissionDetailView: View {
                 .clipShape(Capsule())
 
                 PrimaryButton(title: "Speak Now") {
-                    showSpeakingPractice = true
+                    viewModel.showSpeakingPractice = true
                 }
 
             }
@@ -65,46 +61,31 @@ struct CuratedMissionDetailView: View {
         .navigationTitle("Mission Detail")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
-        .navigationDestination(isPresented: $showFullDetails) {
+        .navigationDestination(isPresented: $viewModel.showFullDetails) {
             FullVocabularyDetailView(vocabulary: vocabulary)
         }
-        .navigationDestination(isPresented: $showSpeakingPractice) {
+        .navigationDestination(isPresented: $viewModel.showSpeakingPractice) {
             PersonalizedSpeakingPracticeView(
                 word: vocabulary.word,
-                sentences: practiceSentences,
-                onFinished: onFinished
+                sentences: viewModel.practiceSentences,
+                onFinished: {
+                    viewModel.showSpeakingPractice = false
+                    onFinished()
+                }
             )
         }
-        .alert("Personalized content unavailable", isPresented: $showPersonalizationAlert) {
+        .alert("Personalized content unavailable", isPresented: $viewModel.showPersonalizationAlert) {
             Button("Continue with dictionary content", role: .cancel) {}
         } message: {
             Text("Vocab.ly could not prepare personalized examples or Indonesian translations right now. You can continue with the original vocabulary content.")
         }
         .task(id: "\(vocabulary.id)-\(selectedDomain)") {
-            personalizationStatus = .loading
-            let cacheKey = PersonalizationCacheHelper.key(for: vocabulary, domain: selectedDomain)
-            if let cache = personalizationCaches.first(where: { $0.cacheKey == cacheKey }),
-               let cachedContent = PersonalizationCacheHelper.content(from: cache, vocabulary: vocabulary) {
-                content = cachedContent
-                personalizationStatus = .ready
-                return
-            }
-
-            let result = await VocabularyPersonalizationHelper.prepareDeduplicated(
+            await viewModel.loadPersonalizedContent(
                 vocabulary: vocabulary,
-                domain: selectedDomain
+                selectedDomain: selectedDomain,
+                caches: personalizationCaches,
+                modelContext: modelContext
             )
-            content = result.content
-            personalizationStatus = result.status
-            PersonalizationCacheHelper.save(
-                result: result,
-                vocabulary: vocabulary,
-                domain: selectedDomain,
-                in: modelContext
-            )
-            if result.status == .unavailable || result.status == .failed {
-                showPersonalizationAlert = true
-            }
         }
     }
 
@@ -127,33 +108,27 @@ struct CuratedMissionDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: Radius.md))
     }
 
-    private var practiceSentences: [String] {
-        let generated = content.generatedExamples.compactMap(\.first)
-        let original = content.definitions.compactMap { $0.examples?.first }
-        return Array((generated + original).prefix(2))
-    }
-
     private var vocabularyCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text(vocabulary.word)
                         .font(.largeTitleBold)
-                    Text(content.translation?.word ?? "")
+                    Text(viewModel.content.translation?.word ?? "")
                         .font(.title3Bold)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 if let ipa = vocabulary.pronunciation?.ipa {
                     ListenAudioButton(title: ipa) {
-                        SpeechHelper.speak(vocabulary.word)
+                        viewModel.speak(text: vocabulary.word)
                     }
                 }
             }
 
             HStack(spacing: 7) {
                 Text(vocabulary.partOfSpeech)
-                if let translation = content.translation?.partOfSpeech, !translation.isEmpty {
+                if let translation = viewModel.content.translation?.partOfSpeech, !translation.isEmpty {
                     Text("•")
                     Text(translation)
                 }
@@ -168,12 +143,12 @@ struct CuratedMissionDetailView: View {
     }
 
     private func definitionCard(_ definition: RecommendedDefinition, index: Int) -> some View {
-        let examples = content.generatedExamples.indices.contains(index) ? content.generatedExamples[index] : []
-        let translations = content.translation?.examples.indices.contains(index) == true
-            ? content.translation?.examples[index] ?? []
+        let examples = viewModel.content.generatedExamples.indices.contains(index) ? viewModel.content.generatedExamples[index] : []
+        let translations = viewModel.content.translation?.examples.indices.contains(index) == true
+            ? viewModel.content.translation?.examples[index] ?? []
             : []
-        let definitionTranslation = content.translation?.definitions.indices.contains(index) == true
-            ? content.translation?.definitions[index]
+        let definitionTranslation = viewModel.content.translation?.definitions.indices.contains(index) == true
+            ? viewModel.content.translation?.definitions[index]
             : nil
 
         return VStack(alignment: .leading, spacing: Spacing.md) {
@@ -208,7 +183,7 @@ struct CuratedMissionDetailView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(alignment: .top, spacing: Spacing.sm) {
                             Button {
-                                SpeechHelper.speak(example)
+                                viewModel.speak(text: example)
                             } label: {
                                 Image.speaker
                                     .foregroundStyle(Color.brandSecondary)
