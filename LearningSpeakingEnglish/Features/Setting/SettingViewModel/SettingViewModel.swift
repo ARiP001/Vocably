@@ -9,6 +9,13 @@ import SwiftUI
 import SwiftData
 import Observation
 
+enum SettingsKey {
+    static let hasCompletedOnboarding = "hasCompletedOnboarding"
+    static let userName = "userName"
+    static let selectedInterest = "selectedInterest"
+    static let dailyGoal = "dailyGoal"
+}
+
 @Observable
 final class SettingViewModel {
     var draftName = ""
@@ -17,7 +24,6 @@ final class SettingViewModel {
     var originalName = ""
     var originalInterest = "General"
     var originalDailyGoal = 3
-    var hasLoadedInitialValue = false
     var showSavedState = false
     var showResetAlert = false
 
@@ -31,28 +37,28 @@ final class SettingViewModel {
         draftDailyGoal != originalDailyGoal
     }
 
-    func loadInitialValues(userName: String, selectedInterest: String, dailyGoal: Int) {
-        guard !hasLoadedInitialValue else { return }
-        draftName = userName
-        draftInterest = selectedInterest
-        draftDailyGoal = dailyGoal
-        originalName = userName
-        originalInterest = selectedInterest
-        originalDailyGoal = dailyGoal
-        hasLoadedInitialValue = true
+    func loadSettings() {
+        let defaults = UserDefaults.standard
+        let storedName = defaults.string(forKey: SettingsKey.userName) ?? "Himmel"
+        let storedInterest = defaults.string(forKey: SettingsKey.selectedInterest) ?? "General"
+        let storedGoal = defaults.integer(forKey: SettingsKey.dailyGoal)
+        let effectiveGoal = storedGoal > 0 ? storedGoal : 3
+
+        draftName = storedName
+        draftInterest = storedInterest
+        draftDailyGoal = effectiveGoal
+        originalName = storedName
+        originalInterest = storedInterest
+        originalDailyGoal = effectiveGoal
     }
 
-    func saveSettings(
-        userName: inout String,
-        selectedInterest: inout String,
-        dailyGoal: inout Int,
-        onDismiss: @escaping () -> Void
-    ) {
+    func saveSettings(onDismiss: @escaping () -> Void) {
         guard hasChanges else { return }
 
-        userName = draftName
-        selectedInterest = draftInterest
-        dailyGoal = draftDailyGoal
+        let defaults = UserDefaults.standard
+        defaults.set(draftName, forKey: SettingsKey.userName)
+        defaults.set(draftInterest, forKey: SettingsKey.selectedInterest)
+        defaults.set(draftDailyGoal, forKey: SettingsKey.dailyGoal)
 
         originalName = draftName
         originalInterest = draftInterest
@@ -68,40 +74,19 @@ final class SettingViewModel {
         }
     }
 
-    func resetToDefault(
-        userName: inout String,
-        selectedInterest: inout String,
-        dailyGoal: inout Int,
-        hasCompletedOnboarding: inout Bool,
-        progressStores: [LearningProgressStore],
-        personalizationCaches: [PersonalizedVocabularyCache],
-        modelContext: ModelContext
-    ) {
-        userName = "Himmel"
-        selectedInterest = "General"
-        dailyGoal = 3
+    func resetToDefault(context: ModelContext) {
+        let defaults = UserDefaults.standard
+        defaults.set("Himmel", forKey: SettingsKey.userName)
+        defaults.set("General", forKey: SettingsKey.selectedInterest)
+        defaults.set(3, forKey: SettingsKey.dailyGoal)
+        defaults.set(false, forKey: SettingsKey.hasCompletedOnboarding)
 
-        draftName = userName
-        draftInterest = selectedInterest
-        draftDailyGoal = dailyGoal
-        originalName = userName
-        originalInterest = selectedInterest
-        originalDailyGoal = dailyGoal
+        loadSettings()
         showSavedState = false
 
-        for item in progressStores {
-            modelContext.delete(item)
-        }
-        for item in personalizationCaches {
-            modelContext.delete(item)
-        }
-
-        do {
-            try modelContext.save()
-        } catch {
-            // Keep reset flow running even if persistence save fails.
-        }
-
-        hasCompletedOnboarding = false
+        // Clear SwiftData persistence records
+        try? context.delete(model: LearningProgressStore.self)
+        try? context.delete(model: PersonalizedVocabularyCache.self)
+        try? context.save()
     }
 }

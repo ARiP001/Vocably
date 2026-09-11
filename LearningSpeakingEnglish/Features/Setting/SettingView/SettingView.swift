@@ -11,12 +11,6 @@ import SwiftData
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Query private var progressStores: [LearningProgressStore]
-    @Query private var personalizationCaches: [PersonalizedVocabularyCache]
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @AppStorage("userName") private var userName = "Himmel"
-    @AppStorage("selectedInterest") private var selectedInterest = "General"
-    @AppStorage("dailyGoal") private var value = 3
     @State private var viewModel = SettingViewModel()
     
     var body: some View {
@@ -78,11 +72,7 @@ struct SettingView: View {
                 
                 Spacer()
                 Button {
-                    viewModel.saveSettings(
-                        userName: &userName,
-                        selectedInterest: &selectedInterest,
-                        dailyGoal: &value
-                    ) {
+                    viewModel.saveSettings {
                         dismiss()
                     }
                 } label: {
@@ -114,24 +104,12 @@ struct SettingView: View {
             }
             .background(Color.bgPrimary)
             .onAppear {
-                viewModel.loadInitialValues(
-                    userName: userName,
-                    selectedInterest: selectedInterest,
-                    dailyGoal: value
-                )
+                viewModel.loadSettings()
             }
             .alert("Reset all settings?", isPresented: $viewModel.showResetAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Reset", role: .destructive) {
-                    viewModel.resetToDefault(
-                        userName: &userName,
-                        selectedInterest: &selectedInterest,
-                        dailyGoal: &value,
-                        hasCompletedOnboarding: &hasCompletedOnboarding,
-                        progressStores: progressStores,
-                        personalizationCaches: personalizationCaches,
-                        modelContext: modelContext
-                    )
+                    viewModel.resetToDefault(context: modelContext)
                 }
             } message: {
                 Text("This will reset your profile, daily goal, and learning progress.")
@@ -139,7 +117,6 @@ struct SettingView: View {
         }
     }
 }
-
 
 #Preview {
     SettingView()

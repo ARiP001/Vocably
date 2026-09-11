@@ -23,7 +23,7 @@ extension Vocab {
 /// Runtime session state that powers mission progress and daily goals.
 struct LearningSession {
     var dailyGoal: Int
-    var vocabList: [Vocab]
+    var vocabList: [Vocab] = []
     var selectedInterest: String = "General"
     var currentIndex: Int = 0
     var learnedVocabIDs: [UUID] = []
@@ -117,15 +117,3 @@ struct LearningSession {
     }
 }
 
-extension LearningSession {
-    /// Creates in-memory session data from bundled vocabulary.
-    @MainActor
-    static func placeholder(dailyGoal: Int, interest: String = "General") -> LearningSession {
-        let vocabulary = VocabularyDataService.load().map(Vocab.init(recommendedVocabulary:))
-        return LearningSession(
-            dailyGoal: max(1, dailyGoal),
-            vocabList: vocabulary,
-            selectedInterest: interest
-        )
-    }
-}

@@ -11,18 +11,18 @@ import SwiftData
 final class LearningProgressStore {
     /// Fixed key so we only keep one progress record.
     var singletonKey: String
-    /// Comma-separated vocab names marked as learned.
-    var learnedVocabNamesCSV: String
+    /// Vocabulary names marked as learned.
+    var learnedVocabNames: [String]
     /// Name of vocab currently selected in mission flow.
     var currentVocabName: String
 
     init(
         singletonKey: String = "main-progress",
-        learnedVocabNamesCSV: String = "",
+        learnedVocabNames: [String] = [],
         currentVocabName: String = ""
     ) {
         self.singletonKey = singletonKey
-        self.learnedVocabNamesCSV = learnedVocabNamesCSV
+        self.learnedVocabNames = learnedVocabNames
         self.currentVocabName = currentVocabName
     }
 }

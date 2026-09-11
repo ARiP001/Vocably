@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import SwiftUI
 import Observation
 
 @Observable
@@ -118,29 +117,37 @@ final class SpeakingPracticeViewModel {
         return "\(result.score.title) · PronScore: \(Int(percentage.rounded()))/100"
     }
 
-    func wordColor(for index: Int, promptWord: String, result: PronunciationResult) -> Color {
-        if result.words.indices.contains(index) {
-            return result.words[index].color
+    func evaluatedWords(prompt: String, result: PronunciationResult) -> [EvaluatedWord] {
+        let words = prompt.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        return words.enumerated().map { index, promptWord in
+            let accuracy: WordAccuracy
+            if result.words.indices.contains(index) {
+                accuracy = wordAccuracy(for: result.words[index].score)
+            } else if let percentage = result.percentage {
+                let normalizedPromptWord = promptWord.lowercased().filter(\.isLetter)
+                let recognized = result.recognizedText
+                    .split(whereSeparator: { !$0.isLetter })
+                    .map { $0.lowercased() }
+                if recognized.contains(normalizedPromptWord) {
+                    accuracy = wordAccuracy(for: percentage)
+                } else {
+                    accuracy = .poor
+                }
+            } else {
+                accuracy = .unassessed
+            }
+            return EvaluatedWord(word: promptWord, accuracy: accuracy)
         }
-        guard let percentage = result.percentage else { return .primary }
-        let normalizedPromptWord = promptWord.lowercased().filter(\.isLetter)
-        let recognized = result.recognizedText
-            .split(whereSeparator: { !$0.isLetter })
-            .map { $0.lowercased() }
-        guard recognized.contains(normalizedPromptWord) else { return .red }
-        return PronunciationWordResult(word: promptWord, score: percentage).color
     }
 
-    func coloredPromptText(prompt: String, result: PronunciationResult) -> Text {
-        let words = prompt.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
-        return words.enumerated().reduce(Text("")) { output, element in
-            let (index, word) = element
-            let color = wordColor(for: index, promptWord: word, result: result)
-            let styledWord = Text(word).foregroundStyle(color)
-            if index == 0 {
-                return Text("\(styledWord)")
-            }
-            return Text("\(output) \(styledWord)")
+    private func wordAccuracy(for score: Double) -> WordAccuracy {
+        switch score {
+        case 80...:
+            return .accurate
+        case 60..<80:
+            return .acceptable
+        default:
+            return .poor
         }
     }
 

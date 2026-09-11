@@ -64,7 +64,7 @@ struct PersonalizedSpeakingPracticeView: View {
                 Text(viewModel.currentStep == 0 ? "Say this word clearly" : "Practice this sentence")
                     .font(.subheadMedium)
                     .foregroundStyle(.secondary)
-                viewModel.coloredPromptText(prompt: viewModel.currentPrompt, result: viewModel.results[viewModel.currentStep])
+                EvaluatedPromptText(evaluatedWords: viewModel.evaluatedWords(prompt: viewModel.currentPrompt, result: viewModel.results[viewModel.currentStep]))
                     .font(viewModel.currentStep == 0 ? .largeTitleBold : .title2Bold)
                     .multilineTextAlignment(.center)
                 Button {

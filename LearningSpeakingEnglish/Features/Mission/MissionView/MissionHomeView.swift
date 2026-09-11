@@ -182,7 +182,7 @@ struct MissionHomeView: View {
 }
 
 private struct MissionHomePreviewWrapper: View {
-    @State private var session = LearningSession.placeholder(dailyGoal: 3, interest: "General")
+    @State private var session = VocabularyDataService.createSession(dailyGoal: 3, interest: "General")
 
     var body: some View {
         MissionHomeView(userName: "Himmel", selectedDomain: "Technology", session: $session)

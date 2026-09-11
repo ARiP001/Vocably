@@ -10,21 +10,21 @@ struct MainTabView: View {
     let dailyGoal: Int
     let interest: String
     let userName: String
+
     @Environment(\.modelContext) private var modelContext
     @Query private var progressStores: [LearningProgressStore]
-    @State private var session: LearningSession
-    @State private var hasRestoredProgress = false
+    @State private var viewModel: MainTabViewModel
 
     init(dailyGoal: Int, interest: String, userName: String) {
         self.dailyGoal = dailyGoal
         self.interest = interest
         self.userName = userName
-        _session = State(initialValue: LearningSession.placeholder(dailyGoal: dailyGoal, interest: interest))
+        _viewModel = State(initialValue: MainTabViewModel(dailyGoal: dailyGoal, interest: interest))
     }
 
     var body: some View {
         TabView {
-            MissionHomeView(userName: userName, selectedDomain: interest, session: $session)
+            MissionHomeView(userName: userName, selectedDomain: interest, session: $viewModel.session)
                 .tabItem {
                     Label {
                         Text("Mission")
@@ -33,7 +33,7 @@ struct MainTabView: View {
                     }
                 }
 
-            ListView(session: $session, selectedDomain: interest)
+            ListView(session: $viewModel.session, selectedDomain: interest)
                 .tabItem {
                     Label {
                         Text("List")
@@ -52,69 +52,19 @@ struct MainTabView: View {
                 }
         }
         .onChange(of: dailyGoal) { _, newGoal in
-            session.dailyGoal = max(1, newGoal)
+            viewModel.updateDailyGoal(newGoal)
         }
         .onChange(of: interest) { _, newInterest in
-            session.selectedInterest = newInterest
+            viewModel.updateInterest(newInterest)
         }
         .onAppear {
-            restoreProgressIfNeeded()
+            viewModel.restoreProgressIfNeeded(stores: progressStores, context: modelContext)
         }
-        .onChange(of: session.learnedVocabIDs) { _, _ in
-            persistProgress()
+        .onChange(of: viewModel.session.learnedVocabIDs) { _, _ in
+            viewModel.persistProgress(stores: progressStores, context: modelContext)
         }
-        .onChange(of: session.currentIndex) { _, _ in
-            persistProgress()
-        }
-    }
-
-    private var progressStore: LearningProgressStore {
-        if let existing = progressStores.first(where: { $0.singletonKey == "main-progress" }) {
-            return existing
-        }
-
-        let created = LearningProgressStore()
-        modelContext.insert(created)
-        return created
-    }
-
-    private func restoreProgressIfNeeded() {
-        guard !hasRestoredProgress else { return }
-        hasRestoredProgress = true
-
-        let store = progressStore
-        let learnedNames = Set(
-            store.learnedVocabNamesCSV
-                .split(separator: ",")
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
-                .filter { !$0.isEmpty }
-        )
-
-        let restoredLearnedIDs = session.vocabList
-            .filter { learnedNames.contains($0.nameEN.lowercased()) }
-            .map { $0.id }
-        session.learnedVocabIDs = restoredLearnedIDs
-
-        if !store.currentVocabName.isEmpty,
-           let restoredIndex = session.vocabList.firstIndex(where: { $0.nameEN.caseInsensitiveCompare(store.currentVocabName) == .orderedSame }) {
-            session.currentIndex = restoredIndex
-        }
-    }
-
-    private func persistProgress() {
-        guard hasRestoredProgress else { return }
-
-        let store = progressStore
-        let learnedNames = session.vocabList
-            .filter { session.learnedVocabIDs.contains($0.id) }
-            .map { $0.nameEN }
-        store.learnedVocabNamesCSV = learnedNames.joined(separator: ",")
-        store.currentVocabName = session.currentVocab?.nameEN ?? ""
-
-        do {
-            try modelContext.save()
-        } catch {
-            // Keep app usable even when persistence fails.
+        .onChange(of: viewModel.session.currentIndex) { _, _ in
+            viewModel.persistProgress(stores: progressStores, context: modelContext)
         }
     }
 }

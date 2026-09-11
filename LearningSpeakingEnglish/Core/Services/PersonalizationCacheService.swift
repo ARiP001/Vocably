@@ -19,10 +19,7 @@ enum PersonalizationCacheService {
         from cache: PersonalizedVocabularyCache,
         vocabulary: RecommendedVocabulary
     ) -> PersonalizedVocabularyContent? {
-        let indexes = cache.selectedDefinitionIndexesCSV
-            .split(separator: ",")
-            .compactMap { Int($0) }
-        let definitions = indexes.compactMap { index in
+        let definitions = cache.selectedDefinitionIndexes.compactMap { index in
             vocabulary.allDefinitions.indices.contains(index) ? vocabulary.allDefinitions[index] : nil
         }
         guard !definitions.isEmpty else { return nil }
@@ -91,7 +88,7 @@ enum PersonalizationCacheService {
             domain: domain,
             promptVersion: promptVersion,
             modelVersion: modelVersion,
-            selectedDefinitionIndexesCSV: indexes.map(String.init).joined(separator: ","),
+            selectedDefinitionIndexes: indexes,
             generatedExamplesJSON: examplesJSON,
             translationJSON: translationJSON
         )
@@ -106,7 +103,7 @@ enum PersonalizationCacheService {
         guard let cache = makeCache(from: result, vocabulary: vocabulary, domain: domain) else { return }
 
         if let existing = try? context.fetch(FetchDescriptor<PersonalizedVocabularyCache>()).first(where: { $0.cacheKey == cache.cacheKey }) {
-            existing.selectedDefinitionIndexesCSV = cache.selectedDefinitionIndexesCSV
+            existing.selectedDefinitionIndexes = cache.selectedDefinitionIndexes
             existing.generatedExamplesJSON = cache.generatedExamplesJSON
             existing.translationJSON = cache.translationJSON
             existing.generatedAt = cache.generatedAt

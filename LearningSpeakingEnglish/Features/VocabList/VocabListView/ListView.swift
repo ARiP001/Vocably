@@ -80,7 +80,7 @@ struct ListView: View {
 }
 
 private struct ListPreviewWrapper: View {
-    @State private var session = LearningSession.placeholder(dailyGoal: 3)
+    @State private var session = VocabularyDataService.createSession(dailyGoal: 3)
 
     var body: some View {
         ListView(session: $session, selectedDomain: "Technology")

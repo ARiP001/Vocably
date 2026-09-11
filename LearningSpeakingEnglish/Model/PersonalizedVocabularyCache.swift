@@ -16,7 +16,7 @@ final class PersonalizedVocabularyCache {
     var domain: String
     var promptVersion: String
     var modelVersion: String
-    var selectedDefinitionIndexesCSV: String
+    var selectedDefinitionIndexes: [Int]
     var generatedExamplesJSON: String
     var translationJSON: String
     var generatedAt: Date
@@ -27,7 +27,7 @@ final class PersonalizedVocabularyCache {
         domain: String,
         promptVersion: String,
         modelVersion: String,
-        selectedDefinitionIndexesCSV: String,
+        selectedDefinitionIndexes: [Int] = [],
         generatedExamplesJSON: String,
         translationJSON: String,
         generatedAt: Date = .now
@@ -37,7 +37,7 @@ final class PersonalizedVocabularyCache {
         self.domain = domain
         self.promptVersion = promptVersion
         self.modelVersion = modelVersion
-        self.selectedDefinitionIndexesCSV = selectedDefinitionIndexesCSV
+        self.selectedDefinitionIndexes = selectedDefinitionIndexes
         self.generatedExamplesJSON = generatedExamplesJSON
         self.translationJSON = translationJSON
         self.generatedAt = generatedAt

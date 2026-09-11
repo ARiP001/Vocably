@@ -5,9 +5,9 @@
 //  Created by Arif Fathurrahman on 11/09/26.
 //
 
-import SwiftUI
+import Foundation
 
-/// Discrete score buckets used across pronunciation feedback UI.
+/// Discrete score buckets used across pronunciation feedback.
 enum PronunciationScore {
     case perfect
     case almost
@@ -26,19 +26,21 @@ enum PronunciationScore {
             return "Unknown"
         }
     }
+}
 
-    var color: Color {
-        switch self {
-        case .perfect:
-            return .green
-        case .almost:
-            return .orange
-        case .keepTrying:
-            return .red
-        case .unrecognized:
-            return .secondary
-        }
-    }
+/// Evaluation tier for an individual word in a practice prompt.
+enum WordAccuracy {
+    case unassessed
+    case accurate
+    case acceptable
+    case poor
+}
+
+/// An evaluated word token ready for presentation rendering.
+struct EvaluatedWord: Identifiable {
+    let id = UUID()
+    let word: String
+    let accuracy: WordAccuracy
 }
 
 /// Overall speech recognition transcript and score assessment.
@@ -51,17 +53,9 @@ struct PronunciationResult {
     var words: [PronunciationWordResult] = []
 }
 
-/// Individual word pronunciation assessment and highlighting color.
+/// Individual word pronunciation assessment.
 struct PronunciationWordResult: Identifiable {
     let id = UUID()
     let word: String
     let score: Double
-
-    var color: Color {
-        switch score {
-        case 80...: return .green
-        case 60..<80: return .yellow
-        default: return .red
-        }
-    }
 }

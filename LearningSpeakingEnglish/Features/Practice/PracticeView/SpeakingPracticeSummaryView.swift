@@ -24,7 +24,7 @@ struct SpeakingPracticeSummaryView: View {
                             .font(.caption1Semibold)
                             .foregroundStyle(.secondary)
 
-                        viewModel.coloredPromptText(prompt: viewModel.prompts[index], result: viewModel.results[index])
+                        EvaluatedPromptText(evaluatedWords: viewModel.evaluatedWords(prompt: viewModel.prompts[index], result: viewModel.results[index]))
                             .font(.headlineRegular)
 
                         HStack(spacing: Spacing.sm) {
