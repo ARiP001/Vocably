@@ -1,12 +1,12 @@
 //
-//  SpeechHelper.swift
+//  SpeechService.swift
 //  LearningSpeakingEnglish
 //
 
 import AVFoundation
 
 /// Handles text-to-speech playback for vocab and sentence prompts.
-enum SpeechHelper {
+enum SpeechService {
     private static let synthesizer = AVSpeechSynthesizer()
 
     /// Speaks input text using the requested language voice.
@@ -33,5 +33,12 @@ enum SpeechHelper {
         utterance.pitchMultiplier = 1.0
 
         synthesizer.speak(utterance)
+    }
+
+    /// Stops speaking immediately if speech synthesis is currently active.
+    static func stop() {
+        if synthesizer.isSpeaking {
+            synthesizer.stopSpeaking(at: .immediate)
+        }
     }
 }

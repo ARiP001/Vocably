@@ -248,7 +248,7 @@ struct FullVocabularyDetailView: View {
             HStack(spacing: 10) {
                 if let ipa = vocabulary.pronunciation?.ipa, !ipa.isEmpty {
                     Button {
-                        SpeechHelper.speak(vocabulary.word, languageCode: "en-US")
+                        SpeechService.speak(vocabulary.word, languageCode: "en-US")
                     } label: {
                         Label {
                             Text(ipa)

@@ -58,10 +58,10 @@ final class SpeakingPracticeViewModel {
     }
 
     func startRecording() {
-        RecordingHelper.requestMicrophonePermission { [weak self] granted in
+        AudioService.requestMicrophonePermission { [weak self] granted in
             guard let self, granted else { return }
             do {
-                let newRecorder = try RecordingHelper.makeRecorder(fileName: "poc-\(UUID().uuidString).wav")
+                let newRecorder = try AudioService.makeRecorder(fileName: "poc-\(UUID().uuidString).wav")
                 self.recorder = newRecorder
                 self.recordingSeconds = 0
                 newRecorder.record()
@@ -92,12 +92,12 @@ final class SpeakingPracticeViewModel {
     }
 
     func playReferenceAudio(for prompt: String) {
-        SpeechHelper.speak(prompt)
+        SpeechService.speak(prompt)
     }
 
     func playUserAttempt(at step: Int) {
         if let url = recordingURLs[step] {
-            RecordingPlaybackHelper.play(url: url)
+            AudioService.play(url: url)
         }
     }
 

@@ -1,12 +1,13 @@
 //
-//  PersonalizationCacheHelper.swift
+//  PersonalizationCacheService.swift
 //  LearningSpeakingEnglish
 //
 
 import Foundation
 import SwiftData
 
-enum PersonalizationCacheHelper {
+/// Service managing SwiftData persistence and cache retrieval for personalized vocabulary content.
+enum PersonalizationCacheService {
     static let promptVersion = "mission-poc-v1"
     static let modelVersion = "foundation-model-default"
 

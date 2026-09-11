@@ -1,12 +1,16 @@
 //
-//  RecordingHelper.swift
+//  AudioService.swift
 //  LearningSpeakingEnglish
 //
 
 import AVFoundation
 
-/// Handles microphone permission and recorder creation.
-enum RecordingHelper {
+/// Consolidated service for microphone recording and audio playback.
+enum AudioService {
+    private static var player: AVAudioPlayer?
+
+    // MARK: - Microphone & Recording
+
     /// Requests microphone access and returns the result on main thread.
     static func requestMicrophonePermission(_ completion: @escaping (Bool) -> Void) {
         AVAudioApplication.requestRecordPermission { granted in
@@ -18,7 +22,9 @@ enum RecordingHelper {
 
     /// Creates a 16 kHz mono PCM WAV recorder for pronunciation assessment.
     static func makeRecorder(fileName: String) throws -> AVAudioRecorder {
-        let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw NSError(domain: "AudioServiceError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Document directory not found"])
+        }
         let fileURL = folder.appendingPathComponent(fileName)
 
         let settings: [String: Any] = [
@@ -39,11 +45,7 @@ enum RecordingHelper {
         return recorder
     }
 
-}
-
-/// Plays previously saved user recordings.
-enum RecordingPlaybackHelper {
-    private static var player: AVAudioPlayer?
+    // MARK: - Playback
 
     /// Plays audio from a local file URL.
     static func play(url: URL) {
@@ -58,5 +60,11 @@ enum RecordingPlaybackHelper {
         } catch {
             // Keep app responsive if playback fails.
         }
+    }
+
+    /// Stops currently playing audio if active.
+    static func stopPlayback() {
+        player?.stop()
+        player = nil
     }
 }

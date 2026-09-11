@@ -34,21 +34,21 @@ final class CuratedMissionDetailViewModel {
         modelContext: ModelContext
     ) async {
         personalizationStatus = .loading
-        let cacheKey = PersonalizationCacheHelper.key(for: vocabulary, domain: selectedDomain)
+        let cacheKey = PersonalizationCacheService.key(for: vocabulary, domain: selectedDomain)
         if let cache = caches.first(where: { $0.cacheKey == cacheKey }),
-           let cachedContent = PersonalizationCacheHelper.content(from: cache, vocabulary: vocabulary) {
+           let cachedContent = PersonalizationCacheService.content(from: cache, vocabulary: vocabulary) {
             content = cachedContent
             personalizationStatus = .ready
             return
         }
 
-        let result = await VocabularyPersonalizationHelper.prepareDeduplicated(
+        let result = await VocabularyPersonalizationService.prepareDeduplicated(
             vocabulary: vocabulary,
             domain: selectedDomain
         )
         content = result.content
         personalizationStatus = result.status
-        PersonalizationCacheHelper.save(
+        PersonalizationCacheService.save(
             result: result,
             vocabulary: vocabulary,
             domain: selectedDomain,
@@ -60,6 +60,6 @@ final class CuratedMissionDetailViewModel {
     }
 
     func speak(text: String, languageCode: String = "en-US") {
-        SpeechHelper.speak(text, languageCode: languageCode)
+        SpeechService.speak(text, languageCode: languageCode)
     }
 }

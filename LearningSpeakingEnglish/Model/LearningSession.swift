@@ -121,7 +121,7 @@ extension LearningSession {
     /// Creates in-memory session data from bundled vocabulary.
     @MainActor
     static func placeholder(dailyGoal: Int, interest: String = "General") -> LearningSession {
-        let vocabulary = VocabularyData.load().map(Vocab.init(recommendedVocabulary:))
+        let vocabulary = VocabularyDataService.load().map(Vocab.init(recommendedVocabulary:))
         return LearningSession(
             dailyGoal: max(1, dailyGoal),
             vocabList: vocabulary,

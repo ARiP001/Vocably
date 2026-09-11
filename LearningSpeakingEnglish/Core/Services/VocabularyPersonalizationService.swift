@@ -1,55 +1,14 @@
 //
-//  VocabularyRecommendationHelper.swift
+//  VocabularyPersonalizationService.swift
 //  LearningSpeakingEnglish
 //
 
 import Foundation
 import FoundationModels
 
-enum VocabularyData {
-    static func load() -> [RecommendedVocabulary] {
-        guard let url = Bundle.main.url(forResource: "vocabulary", withExtension: "json") else {
-            return []
-        }
-
-        do {
-            return try JSONDecoder().decode([RecommendedVocabulary].self, from: Data(contentsOf: url))
-        } catch {
-            return []
-        }
-    }
-}
-    
-/// Ranks the bundled vocabulary according to the POC's 50/30/20 scoring plan.
-enum RecommendationEngine {
-    static func rank(
-        vocabulary: [RecommendedVocabulary],
-        selectedDomain: String
-    ) -> [RankedRecommendedVocabulary] {
-        vocabulary
-            .map { word in
-                let domainScore: Double
-                if word.domain.isEmpty {
-                    domainScore = 0.5
-                } else if word.domain.contains(where: { $0.caseInsensitiveCompare(selectedDomain) == .orderedSame }) {
-                    domainScore = 1
-                } else {
-                    domainScore = 0
-                }
-
-                let score =
-                    (word.normalizedRank * 0.4) +
-                    (domainScore * 0.6)
-//                    (Double.random(in: 0...1) * 0.2)
-                return RankedRecommendedVocabulary(vocabulary: word, score: score)
-            }
-            .sorted { $0.score > $1.score }
-    }
-}
-
-/// Runs the on-device Foundation Model POC and always returns usable fallback content.
+/// Runs the on-device Foundation Model personalization pipeline and returns fallback content if unavailable.
 @MainActor
-enum VocabularyPersonalizationHelper {
+enum VocabularyPersonalizationService {
     private static var inFlight: [String: Task<PersonalizationResult, Never>] = [:]
     private static var failedThisSession = false
 
@@ -61,7 +20,7 @@ enum VocabularyPersonalizationHelper {
         vocabulary: RecommendedVocabulary,
         domain: String
     ) async -> PersonalizationResult {
-        let key = PersonalizationCacheHelper.key(for: vocabulary, domain: domain)
+        let key = PersonalizationCacheService.key(for: vocabulary, domain: domain)
         if failedThisSession {
             return PersonalizationResult(
                 content: .fallback(for: vocabulary),
@@ -113,11 +72,11 @@ enum VocabularyPersonalizationHelper {
         )
 
         let content = PersonalizedVocabularyContent(
-                vocabulary: vocabulary,
-                definitions: selectedDefinitions,
-                generatedExamples: generatedExamples,
-                translation: translation
-            )
+            vocabulary: vocabulary,
+            definitions: selectedDefinitions,
+            generatedExamples: generatedExamples,
+            translation: translation
+        )
         let hasGeneratedContent = translation != nil || generatedExamples.contains(where: { !$0.isEmpty })
 
         return PersonalizationResult(

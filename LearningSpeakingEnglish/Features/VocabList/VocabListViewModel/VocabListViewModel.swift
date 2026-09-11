@@ -28,13 +28,13 @@ final class VocabListViewModel {
 
     func loadVocabulary(selectedDomain: String) {
         if vocabulary.isEmpty {
-            vocabulary = VocabularyData.load()
+            vocabulary = VocabularyDataService.load()
         }
         refreshRanking(selectedDomain: selectedDomain)
     }
 
     func refreshRanking(selectedDomain: String) {
-        rankedVocabulary = RecommendationEngine.rank(
+        rankedVocabulary = RecommendationService.rank(
             vocabulary: vocabulary,
             selectedDomain: selectedDomain
         )

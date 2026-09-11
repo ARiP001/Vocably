@@ -26,7 +26,7 @@ final class MissionHomeViewModel {
 
     func loadRecommendation(selectedDomain: String, session: LearningSession) {
         if vocabulary.isEmpty {
-            vocabulary = VocabularyData.load()
+            vocabulary = VocabularyDataService.load()
         }
         recommendNext(excluding: nil, selectedDomain: selectedDomain, session: session)
     }
@@ -54,7 +54,7 @@ final class MissionHomeViewModel {
     }
 
     func recommendNext(excluding wordID: String?, selectedDomain: String, session: LearningSession) {
-        let ranked = RecommendationEngine.rank(vocabulary: vocabulary, selectedDomain: selectedDomain)
+        let ranked = RecommendationService.rank(vocabulary: vocabulary, selectedDomain: selectedDomain)
         let learned = session.learnedWordNames
 
         // 1. First priority: Unlearned word that has not been skipped in this session
@@ -93,16 +93,16 @@ final class MissionHomeViewModel {
         caches: [PersonalizedVocabularyCache],
         modelContext: ModelContext
     ) async {
-        guard VocabularyPersonalizationHelper.isAvailable else { return }
+        guard VocabularyPersonalizationService.isAvailable else { return }
 
-        let ranked = RecommendationEngine.rank(
+        let ranked = RecommendationService.rank(
             vocabulary: vocabulary,
             selectedDomain: selectedDomain
         )
         let upcoming = Array(ranked.prefix(10))
         let cachedKeys = Set(caches.map(\.cacheKey))
         let cachedCount = upcoming.filter {
-            cachedKeys.contains(PersonalizationCacheHelper.key(for: $0.vocabulary, domain: selectedDomain))
+            cachedKeys.contains(PersonalizationCacheService.key(for: $0.vocabulary, domain: selectedDomain))
         }.count
 
         guard cachedCount < 5 else { return }
@@ -111,14 +111,14 @@ final class MissionHomeViewModel {
         for item in upcoming {
             if Task.isCancelled { return }
 
-            let key = PersonalizationCacheHelper.key(for: item.vocabulary, domain: selectedDomain)
+            let key = PersonalizationCacheService.key(for: item.vocabulary, domain: selectedDomain)
             guard !preparedKeys.contains(key) else { continue }
 
-            let result = await VocabularyPersonalizationHelper.prepareDeduplicated(
+            let result = await VocabularyPersonalizationService.prepareDeduplicated(
                 vocabulary: item.vocabulary,
                 domain: selectedDomain
             )
-            PersonalizationCacheHelper.save(
+            PersonalizationCacheService.save(
                 result: result,
                 vocabulary: item.vocabulary,
                 domain: selectedDomain,
@@ -131,6 +131,6 @@ final class MissionHomeViewModel {
     }
 
     func speak(word: String, languageCode: String = "en-US") {
-        SpeechHelper.speak(word, languageCode: languageCode)
+        SpeechService.speak(word, languageCode: languageCode)
     }
 }
