@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import Observation
 
 @Observable
@@ -87,46 +86,12 @@ final class MissionHomeViewModel {
         })?.vocabulary
     }
 
-    func prefetchUpcomingVocabulary(
-        selectedDomain: String,
-        caches: [PersonalizedVocabularyCache],
-        modelContext: ModelContext
-    ) async {
-        guard VocabularyPersonalizationService.isAvailable else { return }
-
+    func upcomingVocabulary(for selectedDomain: String, limit: Int = 10) -> [RecommendedVocabulary] {
         let ranked = RecommendationService.rank(
             vocabulary: vocabulary,
             selectedDomain: selectedDomain
         )
-        let upcoming = Array(ranked.prefix(10))
-        let cachedKeys = Set(caches.map(\.cacheKey))
-        let cachedCount = upcoming.filter {
-            cachedKeys.contains(PersonalizationCacheService.key(for: $0.vocabulary, domain: selectedDomain))
-        }.count
-
-        guard cachedCount < 5 else { return }
-
-        var preparedKeys = cachedKeys
-        for item in upcoming {
-            if Task.isCancelled { return }
-
-            let key = PersonalizationCacheService.key(for: item.vocabulary, domain: selectedDomain)
-            guard !preparedKeys.contains(key) else { continue }
-
-            let result = await VocabularyPersonalizationService.prepareDeduplicated(
-                vocabulary: item.vocabulary,
-                domain: selectedDomain
-            )
-            PersonalizationCacheService.save(
-                result: result,
-                vocabulary: item.vocabulary,
-                domain: selectedDomain,
-                in: modelContext
-            )
-            if result.status == .ready {
-                preparedKeys.insert(key)
-            }
-        }
+        return Array(ranked.prefix(limit).map(\.vocabulary))
     }
 
     func speak(word: String, languageCode: String = "en-US") {

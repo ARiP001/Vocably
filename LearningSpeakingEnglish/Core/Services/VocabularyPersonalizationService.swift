@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SwiftData
 import FoundationModels
 
 /// Runs the on-device Foundation Model personalization pipeline and returns fallback content if unavailable.
@@ -14,6 +15,42 @@ enum VocabularyPersonalizationService {
 
     static var isAvailable: Bool {
         SystemLanguageModel.default.isAvailable
+    }
+
+    /// Prefetches upcoming vocabulary items into SwiftData cache in the background.
+    static func prefetch(
+        words: [RecommendedVocabulary],
+        domain: String,
+        caches: [PersonalizedVocabularyCache],
+        in context: ModelContext
+    ) async {
+        guard isAvailable else { return }
+
+        let cachedKeys = Set(caches.map(\.cacheKey))
+        let cachedCount = words.filter {
+            cachedKeys.contains(PersonalizationCacheService.key(for: $0, domain: domain))
+        }.count
+
+        guard cachedCount < 5 else { return }
+
+        var preparedKeys = cachedKeys
+        for item in words {
+            if Task.isCancelled { return }
+
+            let key = PersonalizationCacheService.key(for: item, domain: domain)
+            guard !preparedKeys.contains(key) else { continue }
+
+            let result = await prepareDeduplicated(vocabulary: item, domain: domain)
+            PersonalizationCacheService.save(
+                result: result,
+                vocabulary: item,
+                domain: domain,
+                in: context
+            )
+            if result.status == .ready {
+                preparedKeys.insert(key)
+            }
+        }
     }
 
     static func prepareDeduplicated(

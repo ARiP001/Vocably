@@ -58,13 +58,17 @@ struct MainTabView: View {
             viewModel.updateInterest(newInterest)
         }
         .onAppear {
-            viewModel.restoreProgressIfNeeded(stores: progressStores, context: modelContext)
+            guard !viewModel.hasRestoredProgress else { return }
+            viewModel.hasRestoredProgress = true
+            ProgressPersistenceService.restore(session: &viewModel.session, from: progressStores, in: modelContext)
         }
         .onChange(of: viewModel.session.learnedVocabIDs) { _, _ in
-            viewModel.persistProgress(stores: progressStores, context: modelContext)
+            guard viewModel.hasRestoredProgress else { return }
+            ProgressPersistenceService.persist(session: viewModel.session, to: progressStores, in: modelContext)
         }
         .onChange(of: viewModel.session.currentIndex) { _, _ in
-            viewModel.persistProgress(stores: progressStores, context: modelContext)
+            guard viewModel.hasRestoredProgress else { return }
+            ProgressPersistenceService.persist(session: viewModel.session, to: progressStores, in: modelContext)
         }
     }
 }

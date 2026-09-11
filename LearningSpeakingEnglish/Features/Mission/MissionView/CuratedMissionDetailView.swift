@@ -80,11 +80,23 @@ struct CuratedMissionDetailView: View {
             Text("Vocab.ly could not prepare personalized examples or Indonesian translations right now. You can continue with the original vocabulary content.")
         }
         .task(id: "\(vocabulary.id)-\(selectedDomain)") {
+            let cached = PersonalizationCacheService.findContent(
+                for: vocabulary,
+                domain: selectedDomain,
+                in: personalizationCaches
+            )
             await viewModel.loadPersonalizedContent(
                 vocabulary: vocabulary,
                 selectedDomain: selectedDomain,
-                caches: personalizationCaches,
-                modelContext: modelContext
+                cachedContent: cached,
+                onSaveCache: { result in
+                    PersonalizationCacheService.save(
+                        result: result,
+                        vocabulary: vocabulary,
+                        domain: selectedDomain,
+                        in: modelContext
+                    )
+                }
             )
         }
     }

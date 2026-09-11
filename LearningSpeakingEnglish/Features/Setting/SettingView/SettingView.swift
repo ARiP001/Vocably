@@ -109,7 +109,11 @@ struct SettingView: View {
             .alert("Reset all settings?", isPresented: $viewModel.showResetAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Reset", role: .destructive) {
-                    viewModel.resetToDefault(context: modelContext)
+                    viewModel.resetToDefault {
+                        try? modelContext.delete(model: LearningProgressStore.self)
+                        try? modelContext.delete(model: PersonalizedVocabularyCache.self)
+                        try? modelContext.save()
+                    }
                 }
             } message: {
                 Text("This will reset your profile, daily goal, and learning progress.")

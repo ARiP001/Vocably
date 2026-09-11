@@ -5,7 +5,7 @@
 //  Created by Arif Fathurrahman on 10/09/26.
 //
 
-import AVFoundation
+import Foundation
 import Observation
 
 @Observable
@@ -19,12 +19,10 @@ final class SpeakingPracticeViewModel {
     var results: [PronunciationResult] = [PronunciationResult(), PronunciationResult(), PronunciationResult()]
     var recordingSeconds = 0
     var showRecordingSheet = false
-    var isChecking = false
     var showSummary = false
+    var isChecking = false
     var pronunciationError: String?
 
-    @ObservationIgnored private var recorder: AVAudioRecorder?
-    @ObservationIgnored private var recordingTimer: Timer?
     @ObservationIgnored private var assessmentTask: Task<Void, Never>?
 
     init(word: String, sentences: [String], onFinished: @escaping () -> Void) {
@@ -57,36 +55,23 @@ final class SpeakingPracticeViewModel {
     }
 
     func startRecording() {
-        AudioService.requestMicrophonePermission { [weak self] granted in
-            guard let self, granted else { return }
-            do {
-                let newRecorder = try AudioService.makeRecorder(fileName: "poc-\(UUID().uuidString).wav")
-                self.recorder = newRecorder
+        AudioService.startRecording(
+            onTick: { [weak self] seconds in
+                self?.recordingSeconds = seconds
+            },
+            completion: { [weak self] started in
+                guard let self, started else { return }
                 self.recordingSeconds = 0
-                newRecorder.record()
-                self.recordingTimer?.invalidate()
-                self.recordingTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-                    self?.recordingSeconds += 1
-                }
                 self.showRecordingSheet = true
-            } catch {
-                self.recorder = nil
             }
-        }
+        )
     }
 
     func stopRecording() {
         let step = currentStep
-        recorder?.stop()
-        recordingTimer?.invalidate()
-        recordingTimer = nil
-        guard let url = recorder?.url else {
-            showRecordingSheet = false
-            return
-        }
-        recordingURLs[step] = url
-        recorder = nil
         showRecordingSheet = false
+        guard let url = AudioService.stopRecording() else { return }
+        recordingURLs[step] = url
         analyze(url: url, step: step)
     }
 

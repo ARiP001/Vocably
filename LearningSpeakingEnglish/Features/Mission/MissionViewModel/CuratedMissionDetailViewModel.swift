@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import Observation
 
 @Observable
@@ -30,13 +29,11 @@ final class CuratedMissionDetailViewModel {
     func loadPersonalizedContent(
         vocabulary: RecommendedVocabulary,
         selectedDomain: String,
-        caches: [PersonalizedVocabularyCache],
-        modelContext: ModelContext
+        cachedContent: PersonalizedVocabularyContent?,
+        onSaveCache: ((PersonalizationResult) -> Void)? = nil
     ) async {
         personalizationStatus = .loading
-        let cacheKey = PersonalizationCacheService.key(for: vocabulary, domain: selectedDomain)
-        if let cache = caches.first(where: { $0.cacheKey == cacheKey }),
-           let cachedContent = PersonalizationCacheService.content(from: cache, vocabulary: vocabulary) {
+        if let cachedContent {
             content = cachedContent
             personalizationStatus = .ready
             return
@@ -48,12 +45,7 @@ final class CuratedMissionDetailViewModel {
         )
         content = result.content
         personalizationStatus = result.status
-        PersonalizationCacheService.save(
-            result: result,
-            vocabulary: vocabulary,
-            domain: selectedDomain,
-            in: modelContext
-        )
+        onSaveCache?(result)
         if result.status == .unavailable || result.status == .failed {
             showPersonalizationAlert = true
         }

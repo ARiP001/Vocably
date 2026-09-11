@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import Observation
 
 @Observable
@@ -71,7 +70,7 @@ final class SettingViewModel {
         }
     }
 
-    func resetToDefault(context: ModelContext) {
+    func resetToDefault(onClearPersistence: (() -> Void)? = nil) {
         let defaults = UserDefaults.standard
         defaults.set(AppDefaults.fallbackLearnerName, forKey: SettingsKey.userName)
         defaults.set(AppDefaults.defaultInterest, forKey: SettingsKey.selectedInterest)
@@ -81,9 +80,6 @@ final class SettingViewModel {
         loadSettings()
         showSavedState = false
 
-        // Clear SwiftData persistence records
-        try? context.delete(model: LearningProgressStore.self)
-        try? context.delete(model: PersonalizedVocabularyCache.self)
-        try? context.save()
+        onClearPersistence?()
     }
 }

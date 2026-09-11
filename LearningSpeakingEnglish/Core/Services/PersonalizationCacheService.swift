@@ -15,6 +15,17 @@ enum PersonalizationCacheService {
         "\(vocabulary.word.lowercased())|\(domain.lowercased())|\(promptVersion)|\(modelVersion)"
     }
 
+    /// Looks up cached personalized content matching the vocabulary word and domain.
+    static func findContent(
+        for vocabulary: RecommendedVocabulary,
+        domain: String,
+        in caches: [PersonalizedVocabularyCache]
+    ) -> PersonalizedVocabularyContent? {
+        let cacheKey = key(for: vocabulary, domain: domain)
+        guard let cache = caches.first(where: { $0.cacheKey == cacheKey }) else { return nil }
+        return content(from: cache, vocabulary: vocabulary)
+    }
+
     static func content(
         from cache: PersonalizedVocabularyCache,
         vocabulary: RecommendedVocabulary

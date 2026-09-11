@@ -34,10 +34,12 @@ struct MissionHomeView: View {
                 if viewModel.recommendedVocabulary == nil {
                     viewModel.loadRecommendation(selectedDomain: selectedDomain, session: session)
                 }
-                await viewModel.prefetchUpcomingVocabulary(
-                    selectedDomain: selectedDomain,
+                let upcoming = viewModel.upcomingVocabulary(for: selectedDomain)
+                await VocabularyPersonalizationService.prefetch(
+                    words: upcoming,
+                    domain: selectedDomain,
                     caches: personalizationCaches,
-                    modelContext: modelContext
+                    in: modelContext
                 )
             }
             .onChange(of: selectedDomain) { _, _ in
