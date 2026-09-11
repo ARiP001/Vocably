@@ -34,6 +34,17 @@ enum WordAccuracy {
     case accurate
     case acceptable
     case poor
+
+    init(score: Double) {
+        switch score {
+        case 80...:
+            self = .accurate
+        case 60..<80:
+            self = .acceptable
+        default:
+            self = .poor
+        }
+    }
 }
 
 /// An evaluated word token ready for presentation rendering.

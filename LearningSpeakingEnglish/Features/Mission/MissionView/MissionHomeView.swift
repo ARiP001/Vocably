@@ -182,9 +182,16 @@ struct MissionHomeView: View {
 }
 
 private struct MissionHomePreviewWrapper: View {
-    @State private var session = VocabularyDataService.createSession(dailyGoal: 3, interest: "General")
+    @State private var session = VocabularyDataService.createSession(
+        dailyGoal: AppDefaults.defaultDailyGoal,
+        interest: AppDefaults.defaultInterest
+    )
 
     var body: some View {
-        MissionHomeView(userName: "Himmel", selectedDomain: "Technology", session: $session)
+        MissionHomeView(
+            userName: AppDefaults.fallbackLearnerName,
+            selectedDomain: "Technology",
+            session: $session
+        )
     }
 }

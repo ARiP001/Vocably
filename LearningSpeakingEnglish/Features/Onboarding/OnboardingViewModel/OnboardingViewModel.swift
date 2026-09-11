@@ -10,22 +10,16 @@ import Observation
 
 @Observable
 final class OnboardingViewModel {
-    var name: String = "Himmel"
-    var selectedInterest: String = "General"
-    var numberVocab: Int = 3
+    var name: String = ""
+    var selectedInterest: String = AppDefaults.defaultInterest
+    var numberVocab: Int = AppDefaults.defaultDailyGoal
 
-    let interests: [String] = [
-        "General",
-        "Technology",
-        "Business",
-        "Marketing",
-        "Finance",
-        "Engineering",
-        "Creative"
-    ]
+    var interests: [String] {
+        AppDefaults.availableInterests
+    }
 
-    let minVocab: Int = 1
-    let maxVocab: Int = 20
+    let minVocab: Int = AppDefaults.minDailyGoal
+    let maxVocab: Int = AppDefaults.maxDailyGoal
 
     func incrementVocab() {
         if numberVocab < maxVocab {
@@ -40,8 +34,7 @@ final class OnboardingViewModel {
     }
 
     func complete(onComplete: (String, Int, String) -> Void) {
-        let cleanedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let finalName = cleanedName.isEmpty ? "Learner" : cleanedName
+        let finalName = AppDefaults.sanitizedName(name)
         onComplete(finalName, max(minVocab, numberVocab), selectedInterest)
     }
 }

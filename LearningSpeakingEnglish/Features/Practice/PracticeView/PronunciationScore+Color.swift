@@ -20,15 +20,27 @@ extension PronunciationScore {
     }
 }
 
-extension PronunciationWordResult {
+extension WordAccuracy {
     var color: Color {
-        switch score {
-        case 80...:
+        switch self {
+        case .accurate:
             return .green
-        case 60..<80:
+        case .acceptable:
             return .yellow
-        default:
+        case .poor:
             return .red
+        case .unassessed:
+            return .primary
         }
+    }
+}
+
+extension PronunciationWordResult {
+    var accuracy: WordAccuracy {
+        WordAccuracy(score: score)
+    }
+
+    var color: Color {
+        accuracy.color
     }
 }

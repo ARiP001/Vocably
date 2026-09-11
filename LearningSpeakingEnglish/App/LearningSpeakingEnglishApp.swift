@@ -10,10 +10,10 @@ import SwiftData
 
 @main
 struct LearningSpeakingEnglishApp: App {
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @AppStorage("userName") private var userName = "Himmel"
-    @AppStorage("dailyGoal") private var dailyGoal = 3
-    @AppStorage("selectedInterest") private var selectedInterest = "General"
+    @AppStorage(SettingsKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
+    @AppStorage(SettingsKey.userName) private var userName = AppDefaults.fallbackLearnerName
+    @AppStorage(SettingsKey.dailyGoal) private var dailyGoal = AppDefaults.defaultDailyGoal
+    @AppStorage(SettingsKey.selectedInterest) private var selectedInterest = AppDefaults.defaultInterest
     @State private var showSplash = true
 
     var body: some Scene {

@@ -122,14 +122,14 @@ final class SpeakingPracticeViewModel {
         return words.enumerated().map { index, promptWord in
             let accuracy: WordAccuracy
             if result.words.indices.contains(index) {
-                accuracy = wordAccuracy(for: result.words[index].score)
+                accuracy = WordAccuracy(score: result.words[index].score)
             } else if let percentage = result.percentage {
                 let normalizedPromptWord = promptWord.lowercased().filter(\.isLetter)
                 let recognized = result.recognizedText
                     .split(whereSeparator: { !$0.isLetter })
                     .map { $0.lowercased() }
                 if recognized.contains(normalizedPromptWord) {
-                    accuracy = wordAccuracy(for: percentage)
+                    accuracy = WordAccuracy(score: percentage)
                 } else {
                     accuracy = .poor
                 }
@@ -137,17 +137,6 @@ final class SpeakingPracticeViewModel {
                 accuracy = .unassessed
             }
             return EvaluatedWord(word: promptWord, accuracy: accuracy)
-        }
-    }
-
-    private func wordAccuracy(for score: Double) -> WordAccuracy {
-        switch score {
-        case 80...:
-            return .accurate
-        case 60..<80:
-            return .acceptable
-        default:
-            return .poor
         }
     }
 

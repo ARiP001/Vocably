@@ -9,25 +9,20 @@ import SwiftUI
 import SwiftData
 import Observation
 
-enum SettingsKey {
-    static let hasCompletedOnboarding = "hasCompletedOnboarding"
-    static let userName = "userName"
-    static let selectedInterest = "selectedInterest"
-    static let dailyGoal = "dailyGoal"
-}
-
 @Observable
 final class SettingViewModel {
     var draftName = ""
-    var draftInterest = "General"
-    var draftDailyGoal = 3
+    var draftInterest = AppDefaults.defaultInterest
+    var draftDailyGoal = AppDefaults.defaultDailyGoal
     var originalName = ""
-    var originalInterest = "General"
-    var originalDailyGoal = 3
+    var originalInterest = AppDefaults.defaultInterest
+    var originalDailyGoal = AppDefaults.defaultDailyGoal
     var showSavedState = false
     var showResetAlert = false
 
-    let interests = ["General", "Technology", "Business", "Marketing", "Finance", "Engineering", "Creative"]
+    var interests: [String] {
+        AppDefaults.availableInterests
+    }
     let step = 1
     let range = 1...50
 
@@ -39,10 +34,10 @@ final class SettingViewModel {
 
     func loadSettings() {
         let defaults = UserDefaults.standard
-        let storedName = defaults.string(forKey: SettingsKey.userName) ?? "Himmel"
-        let storedInterest = defaults.string(forKey: SettingsKey.selectedInterest) ?? "General"
+        let storedName = defaults.string(forKey: SettingsKey.userName) ?? AppDefaults.fallbackLearnerName
+        let storedInterest = defaults.string(forKey: SettingsKey.selectedInterest) ?? AppDefaults.defaultInterest
         let storedGoal = defaults.integer(forKey: SettingsKey.dailyGoal)
-        let effectiveGoal = storedGoal > 0 ? storedGoal : 3
+        let effectiveGoal = storedGoal > 0 ? storedGoal : AppDefaults.defaultDailyGoal
 
         draftName = storedName
         draftInterest = storedInterest
@@ -55,12 +50,14 @@ final class SettingViewModel {
     func saveSettings(onDismiss: @escaping () -> Void) {
         guard hasChanges else { return }
 
+        let sanitizedName = AppDefaults.sanitizedName(draftName)
         let defaults = UserDefaults.standard
-        defaults.set(draftName, forKey: SettingsKey.userName)
+        defaults.set(sanitizedName, forKey: SettingsKey.userName)
         defaults.set(draftInterest, forKey: SettingsKey.selectedInterest)
         defaults.set(draftDailyGoal, forKey: SettingsKey.dailyGoal)
 
-        originalName = draftName
+        draftName = sanitizedName
+        originalName = sanitizedName
         originalInterest = draftInterest
         originalDailyGoal = draftDailyGoal
 
@@ -76,9 +73,9 @@ final class SettingViewModel {
 
     func resetToDefault(context: ModelContext) {
         let defaults = UserDefaults.standard
-        defaults.set("Himmel", forKey: SettingsKey.userName)
-        defaults.set("General", forKey: SettingsKey.selectedInterest)
-        defaults.set(3, forKey: SettingsKey.dailyGoal)
+        defaults.set(AppDefaults.fallbackLearnerName, forKey: SettingsKey.userName)
+        defaults.set(AppDefaults.defaultInterest, forKey: SettingsKey.selectedInterest)
+        defaults.set(AppDefaults.defaultDailyGoal, forKey: SettingsKey.dailyGoal)
         defaults.set(false, forKey: SettingsKey.hasCompletedOnboarding)
 
         loadSettings()

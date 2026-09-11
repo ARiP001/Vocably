@@ -70,5 +70,9 @@ struct MainTabView: View {
 }
 
 #Preview {
-    MainTabView(dailyGoal: 3, interest: "General", userName: "Himmel")
+    MainTabView(
+        dailyGoal: AppDefaults.defaultDailyGoal,
+        interest: AppDefaults.defaultInterest,
+        userName: AppDefaults.fallbackLearnerName
+    )
 }

@@ -16,8 +16,7 @@ final class MissionHomeViewModel {
     var skippedWordIDs: Set<String> = []
 
     func displayName(for userName: String) -> String {
-        let cleaned = userName.trimmingCharacters(in: .whitespacesAndNewlines)
-        return cleaned.isEmpty ? "Learner" : cleaned
+        AppDefaults.sanitizedName(userName)
     }
 
     func hasCompletedDailyTarget(session: LearningSession) -> Bool {
