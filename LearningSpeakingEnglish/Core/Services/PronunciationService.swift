@@ -119,6 +119,13 @@ struct PronunciationService {
         audioData: Data,
         referenceText: String
     ) async throws -> PronunciationResult {
+        let request = try makeRequest(audioData: audioData, referenceText: referenceText)
+        let data = try await execute(request: request)
+        let best = try decodeBestResult(from: data)
+        return mapToPronunciationResult(best)
+    }
+
+    private func makeRequest(audioData: Data, referenceText: String) throws -> URLRequest {
         let assessment = PronunciationAssessmentConfig(
             referenceText: referenceText,
             gradingSystem: "HundredMark",
@@ -142,7 +149,10 @@ struct PronunciationService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(try assessment.base64Encoded(), forHTTPHeaderField: "Pronunciation-Assessment")
         request.httpBody = audioData
+        return request
+    }
 
+    private func execute(request: URLRequest) async throws -> Data {
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw PronunciationServiceError.invalidResponse
@@ -150,26 +160,37 @@ struct PronunciationService {
         guard 200..<300 ~= httpResponse.statusCode else {
             throw PronunciationServiceError.httpError(statusCode: httpResponse.statusCode)
         }
+        return data
+    }
 
+    private func decodeBestResult(from data: Data) throws -> AzureBestResult {
         let decoded = try JSONDecoder().decode(AzurePronunciationResponse.self, from: data)
         guard let best = decoded.nBest.first else {
             throw PronunciationServiceError.emptyResult
         }
+        return best
+    }
 
+    private func mapToPronunciationResult(_ best: AzureBestResult) -> PronunciationResult {
         let score = best.pronunciationAssessment?.pronunciationScore
             ?? best.pronunciationScore
             ?? best.accuracyScore
             ?? 0
+
         return PronunciationResult(
             recognizedText: best.display ?? best.lexical ?? "",
             score: Self.score(for: score),
             percentage: score,
-            words: (best.words ?? []).compactMap { word in
-                guard let text = word.word,
-                      let accuracy = word.pronunciationAssessment?.accuracyScore ?? word.accuracyScore else { return nil }
-                return PronunciationWordResult(word: text, score: accuracy)
-            }
+            words: mapWordResults(best.words)
         )
+    }
+
+    private func mapWordResults(_ words: [AzureWordResult]?) -> [PronunciationWordResult] {
+        (words ?? []).compactMap { word in
+            guard let text = word.word,
+                  let accuracy = word.pronunciationAssessment?.accuracyScore ?? word.accuracyScore else { return nil }
+            return PronunciationWordResult(word: text, score: accuracy)
+        }
     }
 
     func assess(

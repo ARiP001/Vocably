@@ -105,24 +105,38 @@ final class SpeakingPracticeViewModel {
     func evaluatedWords(prompt: String, result: PronunciationResult) -> [EvaluatedWord] {
         let words = prompt.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
         return words.enumerated().map { index, promptWord in
-            let accuracy: WordAccuracy
-            if result.words.indices.contains(index) {
-                accuracy = WordAccuracy(score: result.words[index].score)
-            } else if let percentage = result.percentage {
-                let normalizedPromptWord = promptWord.lowercased().filter(\.isLetter)
-                let recognized = result.recognizedText
-                    .split(whereSeparator: { !$0.isLetter })
-                    .map { $0.lowercased() }
-                if recognized.contains(normalizedPromptWord) {
-                    accuracy = WordAccuracy(score: percentage)
-                } else {
-                    accuracy = .poor
-                }
-            } else {
-                accuracy = .unassessed
-            }
-            return EvaluatedWord(word: promptWord, accuracy: accuracy)
+            evaluateWord(promptWord, at: index, against: result)
         }
+    }
+
+    private func evaluateWord(
+        _ promptWord: String,
+        at index: Int,
+        against result: PronunciationResult
+    ) -> EvaluatedWord {
+        if result.words.indices.contains(index) {
+            return EvaluatedWord(word: promptWord, accuracy: WordAccuracy(score: result.words[index].score))
+        }
+        guard let percentage = result.percentage else {
+            return EvaluatedWord(word: promptWord, accuracy: .unassessed)
+        }
+        let accuracy = matchAccuracyFromRecognizedText(word: promptWord, result: result, percentage: percentage)
+        return EvaluatedWord(word: promptWord, accuracy: accuracy)
+    }
+
+    private func matchAccuracyFromRecognizedText(
+        word promptWord: String,
+        result: PronunciationResult,
+        percentage: Double
+    ) -> WordAccuracy {
+        let normalizedPromptWord = promptWord.lowercased().filter(\.isLetter)
+        let recognizedWords = result.recognizedText
+            .split(whereSeparator: { !$0.isLetter })
+            .map { $0.lowercased() }
+
+        return recognizedWords.contains(normalizedPromptWord)
+            ? WordAccuracy(score: percentage)
+            : .poor
     }
 
     private func analyze(url: URL, step: Int) {

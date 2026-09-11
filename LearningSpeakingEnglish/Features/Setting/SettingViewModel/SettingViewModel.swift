@@ -38,28 +38,35 @@ final class SettingViewModel {
         let storedGoal = defaults.integer(forKey: SettingsKey.dailyGoal)
         let effectiveGoal = storedGoal > 0 ? storedGoal : AppDefaults.defaultDailyGoal
 
-        draftName = storedName
-        draftInterest = storedInterest
-        draftDailyGoal = effectiveGoal
-        originalName = storedName
-        originalInterest = storedInterest
-        originalDailyGoal = effectiveGoal
+        applySettings(name: storedName, interest: storedInterest, dailyGoal: effectiveGoal)
     }
 
     func saveSettings(onDismiss: @escaping () -> Void) {
         guard hasChanges else { return }
 
         let sanitizedName = AppDefaults.sanitizedName(draftName)
+        persistSettings(name: sanitizedName, interest: draftInterest, dailyGoal: draftDailyGoal)
+        applySettings(name: sanitizedName, interest: draftInterest, dailyGoal: draftDailyGoal)
+        triggerSavedFeedback(onDismiss: onDismiss)
+    }
+
+    private func applySettings(name: String, interest: String, dailyGoal: Int) {
+        draftName = name
+        draftInterest = interest
+        draftDailyGoal = dailyGoal
+        originalName = name
+        originalInterest = interest
+        originalDailyGoal = dailyGoal
+    }
+
+    private func persistSettings(name: String, interest: String, dailyGoal: Int) {
         let defaults = UserDefaults.standard
-        defaults.set(sanitizedName, forKey: SettingsKey.userName)
-        defaults.set(draftInterest, forKey: SettingsKey.selectedInterest)
-        defaults.set(draftDailyGoal, forKey: SettingsKey.dailyGoal)
+        defaults.set(name, forKey: SettingsKey.userName)
+        defaults.set(interest, forKey: SettingsKey.selectedInterest)
+        defaults.set(dailyGoal, forKey: SettingsKey.dailyGoal)
+    }
 
-        draftName = sanitizedName
-        originalName = sanitizedName
-        originalInterest = draftInterest
-        originalDailyGoal = draftDailyGoal
-
+    private func triggerSavedFeedback(onDismiss: @escaping () -> Void) {
         withAnimation(.easeInOut(duration: 0.2)) {
             showSavedState = true
         }

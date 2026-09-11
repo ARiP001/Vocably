@@ -30,35 +30,14 @@ enum PersonalizationCacheService {
         from cache: PersonalizedVocabularyCache,
         vocabulary: RecommendedVocabulary
     ) -> PersonalizedVocabularyContent? {
-        let definitions = cache.selectedDefinitionIndexes.compactMap { index in
-            vocabulary.allDefinitions.indices.contains(index) ? vocabulary.allDefinitions[index] : nil
-        }
+        let definitions = resolveDefinitions(indexes: cache.selectedDefinitionIndexes, in: vocabulary)
         guard !definitions.isEmpty else { return nil }
-
-        let generatedExamples: [[String]]
-        if let data = cache.generatedExamplesJSON.data(using: .utf8),
-           let decoded = try? JSONDecoder().decode([[String]].self, from: data) {
-            generatedExamples = decoded
-        } else {
-            generatedExamples = []
-        }
-
-        var translation: IndonesianVocabularyTranslation?
-        if let data = cache.translationJSON.data(using: .utf8),
-           let decoded = try? JSONDecoder().decode(CachedIndonesianTranslation.self, from: data) {
-            translation = IndonesianVocabularyTranslation(
-                word: decoded.word,
-                partOfSpeech: decoded.partOfSpeech,
-                definitions: decoded.definitions,
-                examples: decoded.examples
-            )
-        }
 
         return PersonalizedVocabularyContent(
             vocabulary: vocabulary,
             definitions: definitions,
-            generatedExamples: generatedExamples,
-            translation: translation
+            generatedExamples: decodeGeneratedExamples(from: cache.generatedExamplesJSON),
+            translation: decodeTranslation(from: cache.translationJSON)
         )
     }
 
@@ -69,28 +48,10 @@ enum PersonalizationCacheService {
     ) -> PersonalizedVocabularyCache? {
         guard result.status == .ready else { return nil }
 
-        let allDefinitions = vocabulary.allDefinitions
-        let indexes = result.content.definitions.compactMap { definition in
-            allDefinitions.firstIndex(of: definition)
-        }
+        let indexes = definitionIndexes(for: result.content.definitions, in: vocabulary)
         guard !indexes.isEmpty,
-              let examplesData = try? JSONEncoder().encode(result.content.generatedExamples),
-              let examplesJSON = String(data: examplesData, encoding: .utf8) else {
+              let examplesJSON = encodeGeneratedExamples(result.content.generatedExamples) else {
             return nil
-        }
-
-        let translationJSON: String
-        if let translation = result.content.translation,
-           let data = try? JSONEncoder().encode(CachedIndonesianTranslation(
-               word: translation.word,
-               partOfSpeech: translation.partOfSpeech,
-               definitions: translation.definitions,
-               examples: translation.examples
-           )),
-           let value = String(data: data, encoding: .utf8) {
-            translationJSON = value
-        } else {
-            translationJSON = ""
         }
 
         return PersonalizedVocabularyCache(
@@ -101,7 +62,7 @@ enum PersonalizationCacheService {
             modelVersion: modelVersion,
             selectedDefinitionIndexes: indexes,
             generatedExamplesJSON: examplesJSON,
-            translationJSON: translationJSON
+            translationJSON: encodeTranslation(result.content.translation)
         )
     }
 
@@ -112,7 +73,69 @@ enum PersonalizationCacheService {
         in context: ModelContext
     ) {
         guard let cache = makeCache(from: result, vocabulary: vocabulary, domain: domain) else { return }
+        upsertCache(cache, in: context)
+        try? context.save()
+    }
 
+    // MARK: - Private Helpers
+
+    private static func resolveDefinitions(
+        indexes: [Int],
+        in vocabulary: RecommendedVocabulary
+    ) -> [RecommendedDefinition] {
+        indexes.compactMap { index in
+            vocabulary.allDefinitions.indices.contains(index) ? vocabulary.allDefinitions[index] : nil
+        }
+    }
+
+    private static func decodeGeneratedExamples(from json: String) -> [[String]] {
+        guard let data = json.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode([[String]].self, from: data) else {
+            return []
+        }
+        return decoded
+    }
+
+    private static func decodeTranslation(from json: String) -> IndonesianVocabularyTranslation? {
+        guard let data = json.data(using: .utf8),
+              let decoded = try? JSONDecoder().decode(CachedIndonesianTranslation.self, from: data) else {
+            return nil
+        }
+        return IndonesianVocabularyTranslation(
+            word: decoded.word,
+            partOfSpeech: decoded.partOfSpeech,
+            definitions: decoded.definitions,
+            examples: decoded.examples
+        )
+    }
+
+    private static func definitionIndexes(
+        for definitions: [RecommendedDefinition],
+        in vocabulary: RecommendedVocabulary
+    ) -> [Int] {
+        let all = vocabulary.allDefinitions
+        return definitions.compactMap { all.firstIndex(of: $0) }
+    }
+
+    private static func encodeGeneratedExamples(_ examples: [[String]]) -> String? {
+        guard let data = try? JSONEncoder().encode(examples) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private static func encodeTranslation(_ translation: IndonesianVocabularyTranslation?) -> String {
+        guard let translation,
+              let data = try? JSONEncoder().encode(CachedIndonesianTranslation(
+                  word: translation.word,
+                  partOfSpeech: translation.partOfSpeech,
+                  definitions: translation.definitions,
+                  examples: translation.examples
+              )) else {
+            return ""
+        }
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
+    private static func upsertCache(_ cache: PersonalizedVocabularyCache, in context: ModelContext) {
         if let existing = try? context.fetch(FetchDescriptor<PersonalizedVocabularyCache>()).first(where: { $0.cacheKey == cache.cacheKey }) {
             existing.selectedDefinitionIndexes = cache.selectedDefinitionIndexes
             existing.generatedExamplesJSON = cache.generatedExamplesJSON
@@ -121,7 +144,5 @@ enum PersonalizationCacheService {
         } else {
             context.insert(cache)
         }
-
-        try? context.save()
     }
 }

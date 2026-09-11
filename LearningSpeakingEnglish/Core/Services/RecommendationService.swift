@@ -12,21 +12,30 @@ enum RecommendationService {
         selectedDomain: String
     ) -> [RankedRecommendedVocabulary] {
         vocabulary
-            .map { word in
-                let domainScore: Double
-                if word.domain.isEmpty {
-                    domainScore = 0.5
-                } else if word.domain.contains(where: { $0.caseInsensitiveCompare(selectedDomain) == .orderedSame }) {
-                    domainScore = 1
-                } else {
-                    domainScore = 0
-                }
-
-                let score =
-                    (word.normalizedRank * 0.4) +
-                    (domainScore * 0.6)
-                return RankedRecommendedVocabulary(vocabulary: word, score: score)
-            }
+            .map { rankItem($0, for: selectedDomain) }
             .sorted { $0.score > $1.score }
+    }
+
+    private static func rankItem(
+        _ word: RecommendedVocabulary,
+        for selectedDomain: String
+    ) -> RankedRecommendedVocabulary {
+        let relevance = domainScore(for: word, domain: selectedDomain)
+        let score = compositeScore(normalizedRank: word.normalizedRank, domainScore: relevance)
+        return RankedRecommendedVocabulary(vocabulary: word, score: score)
+    }
+
+    private static func domainScore(for word: RecommendedVocabulary, domain: String) -> Double {
+        if word.domain.isEmpty {
+            return 0.5
+        }
+        if word.domain.contains(where: { $0.caseInsensitiveCompare(domain) == .orderedSame }) {
+            return 1.0
+        }
+        return 0.0
+    }
+
+    private static func compositeScore(normalizedRank: Double, domainScore: Double) -> Double {
+        (normalizedRank * 0.4) + (domainScore * 0.6)
     }
 }

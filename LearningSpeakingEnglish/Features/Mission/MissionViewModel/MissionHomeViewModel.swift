@@ -55,35 +55,61 @@ final class MissionHomeViewModel {
         let ranked = RecommendationService.rank(vocabulary: vocabulary, selectedDomain: selectedDomain)
         let learned = session.learnedWordNames
 
-        // 1. First priority: Unlearned word that has not been skipped in this session
-        if let next = ranked.first(where: { item in
+        if let next = findUnlearnedUnskipped(in: ranked, excluding: wordID, learned: learned) {
+            recommendedVocabulary = next
+            return
+        }
+
+        if let next = findUnlearned(in: ranked, excluding: wordID, learned: learned) {
+            resetSkipped(keeping: wordID)
+            recommendedVocabulary = next
+            return
+        }
+
+        recommendedVocabulary = fallbackWord(in: ranked, excluding: wordID)
+    }
+
+    private func findUnlearnedUnskipped(
+        in ranked: [RankedRecommendedVocabulary],
+        excluding wordID: String?,
+        learned: Set<String>
+    ) -> RecommendedVocabulary? {
+        ranked.first { item in
             let key = item.vocabulary.word.lowercased()
             guard !learned.contains(key) else { return false }
             guard !skippedWordIDs.contains(key) else { return false }
             if let wordID, key == wordID.lowercased() { return false }
             return true
-        }) {
-            recommendedVocabulary = next.vocabulary
-            return
-        }
+        }?.vocabulary
+    }
 
-        // 2. Second priority: If all unlearned words in domain were skipped, reset skipped list and pick next
-        if let next = ranked.first(where: { item in
+    private func findUnlearned(
+        in ranked: [RankedRecommendedVocabulary],
+        excluding wordID: String?,
+        learned: Set<String>
+    ) -> RecommendedVocabulary? {
+        ranked.first { item in
             let key = item.vocabulary.word.lowercased()
             guard !learned.contains(key) else { return false }
             if let wordID, key == wordID.lowercased() { return false }
             return true
-        }) {
-            skippedWordIDs.removeAll()
-            if let wordID { skippedWordIDs.insert(wordID.lowercased()) }
-            recommendedVocabulary = next.vocabulary
-            return
-        }
+        }?.vocabulary
+    }
 
-        // 3. Fallback: If all words in domain are learned, show next available word excluding current
-        recommendedVocabulary = ranked.first(where: {
+    private func fallbackWord(
+        in ranked: [RankedRecommendedVocabulary],
+        excluding wordID: String?
+    ) -> RecommendedVocabulary? {
+        ranked.first {
             $0.vocabulary.word.caseInsensitiveCompare(wordID ?? "") != .orderedSame
-        })?.vocabulary
+        }?.vocabulary
+    }
+
+    private func resetSkipped(keeping wordID: String?) {
+        skippedWordIDs.removeAll()
+        if let wordID {
+            skippedWordIDs.insert(wordID.lowercased())
+        }
     }
 
     func upcomingVocabulary(for selectedDomain: String, limit: Int = 10) -> [RecommendedVocabulary] {

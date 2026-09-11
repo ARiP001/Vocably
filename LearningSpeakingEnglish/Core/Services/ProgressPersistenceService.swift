@@ -28,21 +28,10 @@ enum ProgressPersistenceService {
         in context: ModelContext
     ) {
         let store = resolveStore(from: stores, in: context)
-        let learnedNames = Set(
-            store.learnedVocabNames
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
-                .filter { !$0.isEmpty }
-        )
+        let learnedNames = normalizedLearnedNames(from: store)
 
-        let restoredLearnedIDs = session.vocabList
-            .filter { learnedNames.contains($0.nameEN.lowercased()) }
-            .map { $0.id }
-        session.learnedVocabIDs = restoredLearnedIDs
-
-        if !store.currentVocabName.isEmpty,
-           let restoredIndex = session.vocabList.firstIndex(where: {
-               $0.nameEN.caseInsensitiveCompare(store.currentVocabName) == .orderedSame
-           }) {
+        session.learnedVocabIDs = restoredLearnedIDs(for: session, matching: learnedNames)
+        if let restoredIndex = restoredCurrentIndex(for: session, targetName: store.currentVocabName) {
             session.currentIndex = restoredIndex
         }
     }
@@ -53,10 +42,7 @@ enum ProgressPersistenceService {
         in context: ModelContext
     ) {
         let store = resolveStore(from: stores, in: context)
-        let learnedNames = session.vocabList
-            .filter { session.learnedVocabIDs.contains($0.id) }
-            .map { $0.nameEN }
-        store.learnedVocabNames = learnedNames
+        store.learnedVocabNames = learnedVocabNames(from: session)
         store.currentVocabName = session.currentVocab?.nameEN ?? ""
 
         do {
@@ -64,5 +50,40 @@ enum ProgressPersistenceService {
         } catch {
             // Keep app usable even when persistence fails.
         }
+    }
+
+    // MARK: - Private Helpers
+
+    private static func normalizedLearnedNames(from store: LearningProgressStore) -> Set<String> {
+        Set(
+            store.learnedVocabNames
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+                .filter { !$0.isEmpty }
+        )
+    }
+
+    private static func restoredLearnedIDs(
+        for session: LearningSession,
+        matching learnedNames: Set<String>
+    ) -> [UUID] {
+        session.vocabList
+            .filter { learnedNames.contains($0.nameEN.lowercased()) }
+            .map { $0.id }
+    }
+
+    private static func restoredCurrentIndex(
+        for session: LearningSession,
+        targetName: String
+    ) -> Int? {
+        guard !targetName.isEmpty else { return nil }
+        return session.vocabList.firstIndex {
+            $0.nameEN.caseInsensitiveCompare(targetName) == .orderedSame
+        }
+    }
+
+    private static func learnedVocabNames(from session: LearningSession) -> [String] {
+        session.vocabList
+            .filter { session.learnedVocabIDs.contains($0.id) }
+            .map { $0.nameEN }
     }
 }

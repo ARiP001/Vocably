@@ -38,20 +38,12 @@ enum AudioService {
                 let fileName = "poc-\(UUID().uuidString).wav"
                 let recorder = try makeRecorder(fileName: fileName)
                 currentRecorder = recorder
-                elapsedSeconds = 0
                 recorder.record()
-
-                recordingTimer?.invalidate()
-                recordingTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                    elapsedSeconds += 1
-                    onTick(elapsedSeconds)
-                }
-
+                startTickTimer(onTick: onTick)
                 completion(true)
             } catch {
                 currentRecorder = nil
-                recordingTimer?.invalidate()
-                recordingTimer = nil
+                stopTickTimer()
                 completion(false)
             }
         }
@@ -59,9 +51,7 @@ enum AudioService {
 
     /// Stops the active recording session and returns the recorded audio file URL.
     static func stopRecording() -> URL? {
-        recordingTimer?.invalidate()
-        recordingTimer = nil
-
+        stopTickTimer()
         guard let recorder = currentRecorder else { return nil }
         recorder.stop()
         let url = recorder.url
@@ -69,14 +59,28 @@ enum AudioService {
         return url
     }
 
+    // MARK: - Recording Helpers
+
     /// Creates a 16 kHz mono PCM WAV recorder for pronunciation assessment.
     private static func makeRecorder(fileName: String) throws -> AVAudioRecorder {
+        let fileURL = try recordingFileURL(fileName: fileName)
+        let settings = pcm16kHzSettings()
+        try configureRecordSession()
+
+        let recorder = try AVAudioRecorder(url: fileURL, settings: settings)
+        recorder.prepareToRecord()
+        return recorder
+    }
+
+    private static func recordingFileURL(fileName: String) throws -> URL {
         guard let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             throw NSError(domain: "AudioServiceError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Document directory not found"])
         }
-        let fileURL = folder.appendingPathComponent(fileName)
+        return folder.appendingPathComponent(fileName)
+    }
 
-        let settings: [String: Any] = [
+    private static func pcm16kHzSettings() -> [String: Any] {
+        [
             AVFormatIDKey: Int(kAudioFormatLinearPCM),
             AVSampleRateKey: 16_000,
             AVNumberOfChannelsKey: 1,
@@ -84,14 +88,26 @@ enum AudioService {
             AVLinearPCMIsFloatKey: false,
             AVLinearPCMIsBigEndianKey: false
         ]
+    }
 
+    private static func configureRecordSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.defaultToSpeaker, .duckOthers])
         try session.setActive(true)
+    }
 
-        let recorder = try AVAudioRecorder(url: fileURL, settings: settings)
-        recorder.prepareToRecord()
-        return recorder
+    private static func startTickTimer(onTick: @escaping (Int) -> Void) {
+        stopTickTimer()
+        elapsedSeconds = 0
+        recordingTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            elapsedSeconds += 1
+            onTick(elapsedSeconds)
+        }
+    }
+
+    private static func stopTickTimer() {
+        recordingTimer?.invalidate()
+        recordingTimer = nil
     }
 
     // MARK: - Playback
@@ -99,16 +115,19 @@ enum AudioService {
     /// Plays audio from a local file URL.
     static func play(url: URL) {
         do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
-            try session.setActive(true)
-
+            try configurePlaybackSession()
             player = try AVAudioPlayer(contentsOf: url)
             player?.prepareToPlay()
             player?.play()
         } catch {
             // Keep app responsive if playback fails.
         }
+    }
+
+    private static func configurePlaybackSession() throws {
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+        try session.setActive(true)
     }
 
     /// Stops currently playing audio if active.
