@@ -40,12 +40,8 @@ struct LearningSession {
 
     /// Safe daily target, clamped to available vocab count.
     var dailyTargetCount: Int {
-        if vocabList.isEmpty {
-            return 0
-        }
-
-        let safeGoal = max(1, dailyGoal)
-        return min(safeGoal, vocabList.count)
+        guard !vocabList.isEmpty else { return 0 }
+        return min(max(1, dailyGoal), vocabList.count)
     }
 
     /// Completed items limited by current daily target.
@@ -55,10 +51,7 @@ struct LearningSession {
 
     /// 0...1 progress value for progress bars.
     var progressValue: Double {
-        if dailyTargetCount == 0 {
-            return 0
-        }
-
+        guard dailyTargetCount > 0 else { return 0 }
         return Double(completedToday) / Double(dailyTargetCount)
     }
 
@@ -68,18 +61,15 @@ struct LearningSession {
 
     /// Currently active vocab from the session index.
     var currentVocab: Vocab? {
-        if vocabList.isEmpty {
-            return nil
-        }
-
+        guard currentIndex >= 0, currentIndex < vocabList.count else { return nil }
         return vocabList[currentIndex]
     }
 
     /// Marks current vocab as learned and advances to next unlearned vocab.
     mutating func finishCurrentLearning() {
-        guard !vocabList.isEmpty else { return }
-
+        guard currentIndex >= 0, currentIndex < vocabList.count else { return }
         let currentID = vocabList[currentIndex].id
+
         if !learnedVocabIDs.contains(currentID) {
             learnedVocabIDs.append(currentID)
         }

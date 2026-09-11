@@ -22,15 +22,11 @@ final class OnboardingViewModel {
     let maxVocab: Int = AppDefaults.maxDailyGoal
 
     func incrementVocab() {
-        if numberVocab < maxVocab {
-            numberVocab += 1
-        }
+        numberVocab = min(maxVocab, numberVocab + 1)
     }
 
     func decrementVocab() {
-        if numberVocab > minVocab {
-            numberVocab -= 1
-        }
+        numberVocab = max(minVocab, numberVocab - 1)
     }
 
     func complete(onComplete: (String, Int, String) -> Void) {

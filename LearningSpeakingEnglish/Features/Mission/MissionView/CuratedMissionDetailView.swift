@@ -155,13 +155,9 @@ struct CuratedMissionDetailView: View {
     }
 
     private func definitionCard(_ definition: RecommendedDefinition, index: Int) -> some View {
-        let examples = viewModel.content.generatedExamples.indices.contains(index) ? viewModel.content.generatedExamples[index] : []
-        let translations = viewModel.content.translation?.examples.indices.contains(index) == true
-            ? viewModel.content.translation?.examples[index] ?? []
-            : []
-        let definitionTranslation = viewModel.content.translation?.definitions.indices.contains(index) == true
-            ? viewModel.content.translation?.definitions[index]
-            : nil
+        let examples = viewModel.examples(at: index)
+        let translations = viewModel.exampleTranslations(at: index)
+        let definitionTranslation = viewModel.definitionTranslation(at: index)
 
         return VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Meaning \(index + 1)")

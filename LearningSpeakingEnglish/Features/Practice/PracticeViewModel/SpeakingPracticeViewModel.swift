@@ -40,10 +40,13 @@ final class SpeakingPracticeViewModel {
     var hasRecordedCurrentStep: Bool { recordingURLs[currentStep] != nil }
 
     var microphoneIsSecondary: Bool {
-        guard hasRecordedCurrentStep, !isChecking else { return false }
-        let result = results[currentStep]
-        guard let score = result.percentage, score >= 85 else { return false }
-        return result.words.allSatisfy { $0.score >= 80 }
+        guard hasRecordedCurrentStep,
+              !isChecking,
+              let score = results[currentStep].percentage,
+              score >= 85 else {
+            return false
+        }
+        return results[currentStep].words.allSatisfy { $0.score >= 80 }
     }
 
     func advance() {

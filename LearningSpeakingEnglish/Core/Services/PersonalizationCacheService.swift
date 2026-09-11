@@ -83,8 +83,10 @@ enum PersonalizationCacheService {
         indexes: [Int],
         in vocabulary: RecommendedVocabulary
     ) -> [RecommendedDefinition] {
-        indexes.compactMap { index in
-            vocabulary.allDefinitions.indices.contains(index) ? vocabulary.allDefinitions[index] : nil
+        let all = vocabulary.allDefinitions
+        return indexes.compactMap { index in
+            guard index >= 0, index < all.count else { return nil }
+            return all[index]
         }
     }
 

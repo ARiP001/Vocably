@@ -51,6 +51,23 @@ final class CuratedMissionDetailViewModel {
         }
     }
 
+    func examples(at index: Int) -> [String] {
+        guard content.generatedExamples.indices.contains(index) else { return [] }
+        return content.generatedExamples[index]
+    }
+
+    func exampleTranslations(at index: Int) -> [String] {
+        guard let translations = content.translation?.examples,
+              translations.indices.contains(index) else { return [] }
+        return translations[index]
+    }
+
+    func definitionTranslation(at index: Int) -> String? {
+        guard let definitions = content.translation?.definitions,
+              definitions.indices.contains(index) else { return nil }
+        return definitions[index]
+    }
+
     func speak(text: String, languageCode: String = "en-US") {
         SpeechService.speak(text, languageCode: languageCode)
     }
