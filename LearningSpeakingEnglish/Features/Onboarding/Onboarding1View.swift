@@ -9,9 +9,7 @@ import SwiftUI
 
 struct Onboarding1View: View {
     var onComplete: (String, Int, String) -> Void
-    @State private var name = "Himmel"
-    @State private var selectedInterest = "General"
-    let interests = ["General", "Technology", "Business", "Marketing", "Finance", "Engineering", "Creative"]
+    @State private var viewModel = OnboardingViewModel()
     
     var body: some View {
         NavigationStack {
@@ -34,7 +32,7 @@ struct Onboarding1View: View {
                     Text("Name (optional)")
                         .foregroundStyle(.gray)
                     
-                    TextField("", text: $name)
+                    TextField("", text: $viewModel.name)
                     
                     Rectangle()
                         .frame(height: 1)
@@ -43,19 +41,15 @@ struct Onboarding1View: View {
                         .foregroundStyle(.gray)
                     
                     Menu {
-                        ForEach(interests, id: \.self) { i in
+                        ForEach(viewModel.interests, id: \.self) { i in
                             Button(i) {
-                                selectedInterest = i
+                                viewModel.selectedInterest = i
                             }
                         }
                     } label: {
                         HStack {
-                            Text(selectedInterest)
-                                .foregroundStyle(
-                                    Color(UIColor { trait in
-                                        trait.userInterfaceStyle == .dark ? .white : .black
-                                    })
-                                )
+                            Text(viewModel.selectedInterest)
+                                .foregroundStyle(.primary)
                             Spacer()
                             Image.chevronDown
                                 .foregroundStyle(Color.brandSecondary.opacity(0.85))
@@ -71,8 +65,7 @@ struct Onboarding1View: View {
                 Spacer()
                 NavigationLink {
                     Onboarding2View(
-                        enteredName: name,
-                        selectedInterest: selectedInterest,
+                        viewModel: viewModel,
                         onComplete: onComplete
                     )
                 } label: {
