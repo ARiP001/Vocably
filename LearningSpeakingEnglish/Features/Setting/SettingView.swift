@@ -17,24 +17,7 @@ struct SettingView: View {
     @AppStorage("userName") private var userName = "Himmel"
     @AppStorage("selectedInterest") private var selectedInterest = "General"
     @AppStorage("dailyGoal") private var value = 3
-    @State private var draftName = ""
-    @State private var draftInterest = "General"
-    @State private var draftDailyGoal = 3
-    @State private var originalName = ""
-    @State private var originalInterest = "General"
-    @State private var originalDailyGoal = 3
-    @State private var hasLoadedInitialValue = false
-    @State private var showSavedState = false
-    @State private var showResetAlert = false
-    let interests = ["General", "Technology", "Business", "Marketing", "Finance", "Engineering", "Creative"]
-    let step = 1
-    let range = 1...50
-
-    private var hasChanges: Bool {
-        draftName != originalName ||
-        draftInterest != originalInterest ||
-        draftDailyGoal != originalDailyGoal
-    }
+    @State private var viewModel = SettingViewModel()
     
     var body: some View {
         NavigationStack {
@@ -52,7 +35,7 @@ struct SettingView: View {
                     Text("Name (optional)")
                         .foregroundStyle(.gray)
                     
-                    TextField("", text: $draftName)
+                    TextField("", text: $viewModel.draftName)
                     
                     Rectangle()
                         .frame(height: 1)
@@ -61,15 +44,15 @@ struct SettingView: View {
                         .foregroundStyle(.gray)
                     
                     Menu {
-                        ForEach(interests, id: \.self) { i in
+                        ForEach(viewModel.interests, id: \.self) { i in
                             Button(i) {
-                                draftInterest = i
+                                viewModel.draftInterest = i
                             }
                         }
                     } label: {
                         HStack {
-                            Text(draftInterest)
-                                .foregroundStyle(.black)
+                            Text(viewModel.draftInterest)
+                                .foregroundStyle(.primary)
                             Spacer()
                             Image.chevronDown
                                 .foregroundStyle(Color.brandSecondary.opacity(0.85))
@@ -80,13 +63,13 @@ struct SettingView: View {
                         .frame(height: 1)
                         .foregroundStyle(.gray.opacity(0.3))
                     Text("Vocab per Day")
-                            .foregroundStyle(.gray)
+                        .foregroundStyle(.gray)
                         
-                    Stepper(value: $draftDailyGoal, in: range, step: step) {
-                        TextField("Target", value: $draftDailyGoal, format: .number)
+                    Stepper(value: $viewModel.draftDailyGoal, in: viewModel.range, step: viewModel.step) {
+                        TextField("Target", value: $viewModel.draftDailyGoal, format: .number)
                             .keyboardType(.numberPad)
                             .textFieldStyle(.plain)
-                        }
+                    }
                     Rectangle()
                         .frame(height: 1)
                         .foregroundStyle(.gray.opacity(0.3))
@@ -95,22 +78,28 @@ struct SettingView: View {
                 
                 Spacer()
                 Button {
-                    saveAndClose()
+                    viewModel.saveSettings(
+                        userName: &userName,
+                        selectedInterest: &selectedInterest,
+                        dailyGoal: &value
+                    ) {
+                        dismiss()
+                    }
                 } label: {
                     HStack(spacing: Spacing.sm) {
-                        if showSavedState {
+                        if viewModel.showSavedState {
                             Image.checkmark
                         }
-                        Text(showSavedState ? "Saved" : "Confirm")
+                        Text(viewModel.showSavedState ? "Saved" : "Confirm")
                     }
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Spacing.md)
-                        .background(hasChanges ? Color.brandPrimary : Color.gray.opacity(0.35))
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.md)
+                    .background(viewModel.hasChanges ? Color.brandPrimary : Color.gray.opacity(0.35))
+                    .foregroundStyle(.white)
+                    .clipShape(Capsule())
                 }
-                .disabled(showSavedState || !hasChanges)
+                .disabled(viewModel.showSavedState || !viewModel.hasChanges)
             }
             .padding()
             .navigationTitle("Edit Setting")
@@ -118,77 +107,36 @@ struct SettingView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Reset") {
-                        showResetAlert = true
+                        viewModel.showResetAlert = true
                     }
                     .foregroundStyle(.red)
                 }
             }
             .background(Color.bgPrimary)
             .onAppear {
-                guard !hasLoadedInitialValue else { return }
-                draftName = userName
-                draftInterest = selectedInterest
-                draftDailyGoal = value
-                originalName = userName
-                originalInterest = selectedInterest
-                originalDailyGoal = value
-                hasLoadedInitialValue = true
+                viewModel.loadInitialValues(
+                    userName: userName,
+                    selectedInterest: selectedInterest,
+                    dailyGoal: value
+                )
             }
-            .alert("Reset all settings?", isPresented: $showResetAlert) {
+            .alert("Reset all settings?", isPresented: $viewModel.showResetAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Reset", role: .destructive) {
-                    resetToDefaultAndReturnOnboarding()
+                    viewModel.resetToDefault(
+                        userName: &userName,
+                        selectedInterest: &selectedInterest,
+                        dailyGoal: &value,
+                        hasCompletedOnboarding: &hasCompletedOnboarding,
+                        progressStores: progressStores,
+                        personalizationCaches: personalizationCaches,
+                        modelContext: modelContext
+                    )
                 }
             } message: {
                 Text("This will reset your profile, daily goal, and learning progress.")
             }
         }
-    }
-
-    private func saveAndClose() {
-        guard hasChanges else { return }
-
-        userName = draftName
-        selectedInterest = draftInterest
-        value = draftDailyGoal
-
-        withAnimation(.easeInOut(duration: 0.2)) {
-            showSavedState = true
-        }
-
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(0.9))
-            dismiss()
-        }
-    }
-
-    private func resetToDefaultAndReturnOnboarding() {
-        userName = "Himmel"
-        selectedInterest = "General"
-        value = 3
-
-        draftName = userName
-        draftInterest = selectedInterest
-        draftDailyGoal = value
-        originalName = userName
-        originalInterest = selectedInterest
-        originalDailyGoal = value
-        showSavedState = false
-
-        for item in progressStores {
-            modelContext.delete(item)
-        }
-        for item in personalizationCaches {
-            modelContext.delete(item)
-        }
-
-        do {
-            try modelContext.save()
-        } catch {
-            // Keep reset flow running even if persistence save fails.
-        }
-
-        hasCompletedOnboarding = false
     }
 }
 

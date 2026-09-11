@@ -37,7 +37,7 @@ struct ListView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    List(filteredVocabulary) { item in
+                    List( ) { item in
                         NavigationLink {
                             CuratedMissionDetailView(
                                 vocabulary: item.vocabulary,
