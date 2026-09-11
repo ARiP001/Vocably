@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct RunnerProgressView: View {
-    var progress: CGFloat
+    var progress: Double
 
-    private var normalizedProgress: CGFloat {
+    private var normalizedProgress: Double {
         min(max(progress, 0), 1)
     }
 

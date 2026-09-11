@@ -151,10 +151,6 @@ struct PronunciationService {
             throw PronunciationServiceError.httpError(statusCode: httpResponse.statusCode)
         }
 
-#if DEBUG
-        print("[PronunciationService] HTTP \(httpResponse.statusCode) response received")
-#endif
-
         let decoded = try JSONDecoder().decode(AzurePronunciationResponse.self, from: data)
         guard let best = decoded.nBest.first else {
             throw PronunciationServiceError.emptyResult
@@ -164,12 +160,6 @@ struct PronunciationService {
             ?? best.pronunciationScore
             ?? best.accuracyScore
             ?? 0
-        let wordDiagnostics = (best.words ?? []).map { word in
-            "\(word.word ?? "?"): \(word.pronunciationAssessment?.accuracyScore ?? word.accuracyScore ?? 0)"
-        }
-#if DEBUG
-        print("[PronunciationService] PronScore=\(score), words=\(wordDiagnostics)")
-#endif
         return PronunciationResult(
             recognizedText: best.display ?? best.lexical ?? "",
             score: Self.score(for: score),

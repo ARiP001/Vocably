@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CoreGraphics
 
 /// Lightweight vocabulary representation used by LearningSession.
 struct Vocab: Identifiable {
@@ -55,12 +54,12 @@ struct LearningSession {
     }
 
     /// 0...1 progress value for progress bars.
-    var progressValue: CGFloat {
+    var progressValue: Double {
         if dailyTargetCount == 0 {
             return 0
         }
 
-        return CGFloat(completedToday) / CGFloat(dailyTargetCount)
+        return Double(completedToday) / Double(dailyTargetCount)
     }
 
     var progressText: String {
