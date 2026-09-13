@@ -111,7 +111,7 @@ final class SpeakingPracticeViewModel {
         guard let score = result.overallScore else {
             return result.score.title
         }
-        return "\(result.score.title) · PronScore: \(Int(score.rounded()))/100"
+        return "\(result.score.title) · Score: \(Int(score.rounded()))/100"
     }
 
     func evaluatedWords(prompt: String, result: PronunciationResult) -> [EvaluatedWord] {
