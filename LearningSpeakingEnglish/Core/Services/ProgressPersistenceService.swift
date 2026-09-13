@@ -48,7 +48,7 @@ enum ProgressPersistenceService {
         do {
             try context.save()
         } catch {
-            // Keep app usable even when persistence fails.
+            print("[ProgressPersistenceService] Failed to persist progress: \(error.localizedDescription)")
         }
     }
 

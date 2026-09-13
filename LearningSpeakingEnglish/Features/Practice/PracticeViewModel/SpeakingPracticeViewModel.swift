@@ -62,10 +62,15 @@ final class SpeakingPracticeViewModel {
             onTick: { [weak self] seconds in
                 self?.recordingSeconds = seconds
             },
-            completion: { [weak self] started in
-                guard let self, started else { return }
-                self.recordingSeconds = 0
-                self.showRecordingSheet = true
+            completion: { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success:
+                    self.recordingSeconds = 0
+                    self.showRecordingSheet = true
+                case .failure(let error):
+                    self.pronunciationError = error.localizedDescription
+                }
             }
         )
     }
@@ -152,15 +157,26 @@ final class SpeakingPracticeViewModel {
                 }
                 let result = try await service.assess(fileURL: url, referenceText: prompts[step])
                 results[step] = result
+            } catch PronunciationServiceError.missingConfiguration {
+                handleAssessmentError("Azure Speech credentials are not configured. Please check Info.plist.", step: step)
+            } catch PronunciationServiceError.emptyResult {
+                handleAssessmentError("No speech detected. Please speak clearly into the microphone.", step: step)
+            } catch PronunciationServiceError.httpError(let statusCode) {
+                handleAssessmentError("Pronunciation service error (HTTP \(statusCode)). Please try again later.", step: step)
+            } catch let urlError as URLError where urlError.code == .notConnectedToInternet || urlError.code == .networkConnectionLost {
+                handleAssessmentError("Check your internet connection to assess pronunciation.", step: step)
             } catch {
-                if Task.isCancelled { return }
-                results[step] = PronunciationResult()
-                pronunciationError = error.localizedDescription
-                print("Azure pronunciation assessment failed: \(error)")
+                handleAssessmentError("Unable to evaluate pronunciation: \(error.localizedDescription)", step: step)
             }
             isChecking = false
             assessmentTask = nil
         }
+    }
+
+    private func handleAssessmentError(_ message: String, step: Int) {
+        guard !Task.isCancelled else { return }
+        results[step] = PronunciationResult()
+        pronunciationError = message
     }
 
     private func cleanupRecordings() {

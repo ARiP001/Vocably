@@ -74,7 +74,11 @@ enum PersonalizationCacheService {
     ) {
         guard let cache = makeCache(from: result, vocabulary: vocabulary, domain: domain) else { return }
         upsertCache(cache, in: context)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("[PersonalizationCacheService] Failed to save personalized cache: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Private Helpers
@@ -138,12 +142,18 @@ enum PersonalizationCacheService {
     }
 
     private static func upsertCache(_ cache: PersonalizedVocabularyCache, in context: ModelContext) {
-        if let existing = try? context.fetch(FetchDescriptor<PersonalizedVocabularyCache>()).first(where: { $0.cacheKey == cache.cacheKey }) {
-            existing.selectedDefinitionIndexes = cache.selectedDefinitionIndexes
-            existing.generatedExamplesJSON = cache.generatedExamplesJSON
-            existing.translationJSON = cache.translationJSON
-            existing.generatedAt = cache.generatedAt
-        } else {
+        do {
+            let existing = try context.fetch(FetchDescriptor<PersonalizedVocabularyCache>()).first(where: { $0.cacheKey == cache.cacheKey })
+            if let existing {
+                existing.selectedDefinitionIndexes = cache.selectedDefinitionIndexes
+                existing.generatedExamplesJSON = cache.generatedExamplesJSON
+                existing.translationJSON = cache.translationJSON
+                existing.generatedAt = cache.generatedAt
+            } else {
+                context.insert(cache)
+            }
+        } catch {
+            print("[PersonalizationCacheService] Failed to fetch existing cache: \(error.localizedDescription)")
             context.insert(cache)
         }
     }

@@ -5,6 +5,26 @@
 
 import AVFoundation
 
+enum AudioServiceError: LocalizedError {
+    case permissionDenied
+    case directoryNotFound
+    case sessionSetupFailed(Error)
+    case recorderInitializationFailed(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .permissionDenied:
+            return "Microphone permission was denied. Please enable microphone access in iOS Settings to practice speaking."
+        case .directoryNotFound:
+            return "Unable to locate document directory for audio recording."
+        case .sessionSetupFailed(let error):
+            return "Failed to configure audio session: \(error.localizedDescription)"
+        case .recorderInitializationFailed(let error):
+            return "Failed to initialize audio recorder: \(error.localizedDescription)"
+        }
+    }
+}
+
 /// Consolidated service for microphone recording and audio playback.
 enum AudioService {
     private static var player: AVAudioPlayer?
@@ -26,11 +46,11 @@ enum AudioService {
     /// Starts a recording session with an automated duration tick timer.
     static func startRecording(
         onTick: @escaping (Int) -> Void,
-        completion: @escaping (Bool) -> Void
+        completion: @escaping (Result<Void, AudioServiceError>) -> Void
     ) {
         requestMicrophonePermission { granted in
             guard granted else {
-                completion(false)
+                completion(.failure(.permissionDenied))
                 return
             }
 
@@ -40,11 +60,15 @@ enum AudioService {
                 currentRecorder = recorder
                 recorder.record()
                 startTickTimer(onTick: onTick)
-                completion(true)
+                completion(.success(()))
+            } catch let error as AudioServiceError {
+                currentRecorder = nil
+                stopTickTimer()
+                completion(.failure(error))
             } catch {
                 currentRecorder = nil
                 stopTickTimer()
-                completion(false)
+                completion(.failure(.recorderInitializationFailed(error)))
             }
         }
     }
@@ -67,14 +91,18 @@ enum AudioService {
         let settings = pcm16kHzSettings()
         try configureRecordSession()
 
-        let recorder = try AVAudioRecorder(url: fileURL, settings: settings)
-        recorder.prepareToRecord()
-        return recorder
+        do {
+            let recorder = try AVAudioRecorder(url: fileURL, settings: settings)
+            recorder.prepareToRecord()
+            return recorder
+        } catch {
+            throw AudioServiceError.recorderInitializationFailed(error)
+        }
     }
 
     private static func recordingFileURL(fileName: String) throws -> URL {
         guard let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            throw NSError(domain: "AudioServiceError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Document directory not found"])
+            throw AudioServiceError.directoryNotFound
         }
         return folder.appendingPathComponent(fileName)
     }
@@ -91,9 +119,13 @@ enum AudioService {
     }
 
     private static func configureRecordSession() throws {
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.defaultToSpeaker, .duckOthers])
-        try session.setActive(true)
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.defaultToSpeaker, .duckOthers])
+            try session.setActive(true)
+        } catch {
+            throw AudioServiceError.sessionSetupFailed(error)
+        }
     }
 
     private static func startTickTimer(onTick: @escaping (Int) -> Void) {
