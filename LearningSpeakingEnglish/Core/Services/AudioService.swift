@@ -55,7 +55,7 @@ enum AudioService {
             }
 
             do {
-                let fileName = "poc-\(UUID().uuidString).wav"
+                let fileName = "vocably-\(UUID().uuidString).wav"
                 let recorder = try makeRecorder(fileName: fileName)
                 currentRecorder = recorder
                 recorder.record()
@@ -82,8 +82,6 @@ enum AudioService {
         currentRecorder = nil
         return url
     }
-
-    // MARK: - Helper Perekaman
 
     /// Membuat recorder WAV Linear PCM 16 kHz mono untuk penilaian pengucapan Azure.
     private static func makeRecorder(fileName: String) throws -> AVAudioRecorder {
