@@ -43,7 +43,7 @@ enum ProgressPersistenceService {
     ) {
         let store = resolveStore(from: stores, in: context)
         store.learnedVocabNames = learnedVocabNames(from: session)
-        store.currentVocabName = session.currentVocab?.nameEN ?? ""
+        store.currentVocabName = session.currentVocab?.word ?? ""
 
         do {
             try context.save()
@@ -67,7 +67,7 @@ enum ProgressPersistenceService {
         matching learnedNames: Set<String>
     ) -> [UUID] {
         session.vocabList
-            .filter { learnedNames.contains($0.nameEN.lowercased()) }
+            .filter { learnedNames.contains($0.word.lowercased()) }
             .map { $0.id }
     }
 
@@ -77,13 +77,13 @@ enum ProgressPersistenceService {
     ) -> Int? {
         guard !targetName.isEmpty else { return nil }
         return session.vocabList.firstIndex {
-            $0.nameEN.caseInsensitiveCompare(targetName) == .orderedSame
+            $0.word.caseInsensitiveCompare(targetName) == .orderedSame
         }
     }
 
     private static func learnedVocabNames(from session: LearningSession) -> [String] {
         session.vocabList
             .filter { session.learnedVocabIDs.contains($0.id) }
-            .map { $0.nameEN }
+            .map { $0.word }
     }
 }

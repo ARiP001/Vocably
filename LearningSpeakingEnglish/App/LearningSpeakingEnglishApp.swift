@@ -24,7 +24,7 @@ struct LearningSpeakingEnglishApp: App {
                         userName: userName
                     )
                 } else {
-                    Onboarding1View { name, selectedDailyGoal, interest in
+                    OnboardingProfileView { name, selectedDailyGoal, interest in
                         userName = name
                         dailyGoal = selectedDailyGoal
                         selectedInterest = interest

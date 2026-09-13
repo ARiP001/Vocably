@@ -33,7 +33,7 @@ struct MainTabView: View {
                     }
                 }
 
-            ListView(session: $viewModel.session, selectedDomain: interest)
+            VocabListView(session: $viewModel.session, selectedDomain: interest)
                 .tabItem {
                     Label {
                         Text("List")
@@ -42,10 +42,10 @@ struct MainTabView: View {
                     }
                 }
             
-            SettingView()
+            SettingsView()
                 .tabItem {
                     Label {
-                        Text("Setting")
+                        Text("Settings")
                     } icon: {
                         Image.settings
                     }

@@ -5,7 +5,8 @@
 
 import SwiftUI
 
-struct ListView: View {
+/// Screen displaying searchable and ranked vocabulary list.
+struct VocabListView: View {
     @Binding var session: LearningSession
     let selectedDomain: String
 
@@ -75,6 +76,9 @@ struct ListView: View {
     }
 }
 
+/// Backward compatibility alias for VocabListView.
+typealias ListView = VocabListView
+
 #Preview {
     ListPreviewWrapper()
 }
@@ -83,6 +87,6 @@ private struct ListPreviewWrapper: View {
     @State private var session = VocabularyDataService.createSession(dailyGoal: 3)
 
     var body: some View {
-        ListView(session: $session, selectedDomain: "Technology")
+        VocabListView(session: $session, selectedDomain: "Technology")
     }
 }

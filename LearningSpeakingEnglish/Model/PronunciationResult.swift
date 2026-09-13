@@ -59,7 +59,7 @@ struct PronunciationResult {
     var recognizedText: String = ""
     var score: PronunciationScore = .unrecognized
     /// Overall Azure HundredMark score (0...100).
-    var percentage: Double?
+    var overallScore: Double?
     /// Scores returned for each recognized word, in spoken order.
     var words: [PronunciationWordResult] = []
 }

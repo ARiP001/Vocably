@@ -10,12 +10,12 @@ import Foundation
 /// Lightweight vocabulary representation used by LearningSession.
 struct Vocab: Identifiable {
     let id: UUID = UUID()
-    let nameEN: String
+    let word: String
 }
 
 extension Vocab {
     init(recommendedVocabulary: RecommendedVocabulary) {
-        self.init(nameEN: recommendedVocabulary.word)
+        self.init(word: recommendedVocabulary.word)
     }
 }
 
@@ -30,7 +30,7 @@ struct LearningSession {
     /// Set of lowercase vocabulary names that have been marked as learned.
     var learnedWordNames: Set<String> {
         let learnedSet = Set(learnedVocabIDs)
-        return Set(vocabList.filter { learnedSet.contains($0.id) }.map { $0.nameEN.lowercased() })
+        return Set(vocabList.filter { learnedSet.contains($0.id) }.map { $0.word.lowercased() })
     }
 
     /// Checks whether a given vocabulary word has already been learned.
@@ -79,7 +79,7 @@ struct LearningSession {
 
     /// Marks a vocabulary item learned by word name.
     mutating func finishLearning(named name: String) {
-        guard let index = vocabList.firstIndex(where: { $0.nameEN.caseInsensitiveCompare(name) == .orderedSame }) else {
+        guard let index = vocabList.firstIndex(where: { $0.word.caseInsensitiveCompare(name) == .orderedSame }) else {
             return
         }
 

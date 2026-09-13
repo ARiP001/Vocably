@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct Onboarding2View: View {
+/// Screen for selecting daily vocabulary learning goal during onboarding.
+struct OnboardingGoalView: View {
     let viewModel: OnboardingViewModel
-    var onComplete: (String, Int, String) -> Void
+    var onComplete: (_ name: String, _ dailyGoal: Int, _ interest: String) -> Void
 
     var body: some View {
         VStack(spacing: Spacing.lg) {
@@ -25,7 +26,7 @@ struct Onboarding2View: View {
             HStack(spacing: 60) {
                 
                 Button {
-                    viewModel.decrementVocab()
+                    viewModel.decrementDailyGoal()
                 } label: {
                     Text("-")
                         .font(.largeTitleBold)
@@ -33,7 +34,7 @@ struct Onboarding2View: View {
                 }
                 
                 VStack(spacing: Spacing.xs) {
-                    Text("\(viewModel.numberVocab)")
+                    Text("\(viewModel.dailyGoalCount)")
                         .font(.largeTitleBold)
                     Rectangle()
                         .fill(Color.brandPrimary.opacity(0.35))
@@ -41,7 +42,7 @@ struct Onboarding2View: View {
                 }
                 
                 Button {
-                    viewModel.incrementVocab()
+                    viewModel.incrementDailyGoal()
                 } label: {
                     Text("+")
                         .font(.largeTitleBold)
@@ -65,9 +66,12 @@ struct Onboarding2View: View {
     }
 }
 
+/// Backward compatibility alias for OnboardingGoalView.
+typealias Onboarding2View = OnboardingGoalView
+
 #Preview {
     NavigationStack {
-        Onboarding2View(viewModel: OnboardingViewModel()) { _, _, _ in
+        OnboardingGoalView(viewModel: OnboardingViewModel()) { _, _, _ in
         }
     }
 }

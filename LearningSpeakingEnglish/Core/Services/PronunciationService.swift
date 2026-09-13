@@ -180,7 +180,7 @@ struct PronunciationService {
         return PronunciationResult(
             recognizedText: best.display ?? best.lexical ?? "",
             score: Self.score(for: score),
-            percentage: score,
+            overallScore: score,
             words: mapWordResults(best.words)
         )
     }

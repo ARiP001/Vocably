@@ -8,8 +8,9 @@
 import SwiftUI
 import Observation
 
+/// ViewModel managing user profile settings, interest selection, and daily goal preferences.
 @Observable
-final class SettingViewModel {
+final class SettingsViewModel {
     var draftName = ""
     var draftInterest = AppDefaults.defaultInterest
     var draftDailyGoal = AppDefaults.defaultDailyGoal
@@ -90,3 +91,6 @@ final class SettingViewModel {
         onClearPersistence?()
     }
 }
+
+/// Backward compatibility alias for SettingsViewModel.
+typealias SettingViewModel = SettingsViewModel

@@ -7,8 +7,9 @@
 
 import SwiftUI
 
-struct Onboarding1View: View {
-    var onComplete: (String, Int, String) -> Void
+/// Screen for setting up user profile and interest area during onboarding.
+struct OnboardingProfileView: View {
+    var onComplete: (_ name: String, _ dailyGoal: Int, _ interest: String) -> Void
     @State private var viewModel = OnboardingViewModel()
     
     var body: some View {
@@ -64,7 +65,7 @@ struct Onboarding1View: View {
                 
                 Spacer()
                 NavigationLink {
-                    Onboarding2View(
+                    OnboardingGoalView(
                         viewModel: viewModel,
                         onComplete: onComplete
                     )
@@ -86,7 +87,10 @@ struct Onboarding1View: View {
     }
 }
 
+/// Backward compatibility alias for OnboardingProfileView.
+typealias Onboarding1View = OnboardingProfileView
+
 #Preview {
-    Onboarding1View { _, _, _ in
+    OnboardingProfileView { _, _, _ in
     }
 }

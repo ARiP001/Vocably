@@ -12,25 +12,25 @@ import Observation
 final class OnboardingViewModel {
     var name: String = ""
     var selectedInterest: String = AppDefaults.defaultInterest
-    var numberVocab: Int = AppDefaults.defaultDailyGoal
+    var dailyGoalCount: Int = AppDefaults.defaultDailyGoal
 
     var interests: [String] {
         AppDefaults.availableInterests
     }
 
-    let minVocab: Int = AppDefaults.minDailyGoal
-    let maxVocab: Int = AppDefaults.maxDailyGoal
+    let minimumDailyGoal: Int = AppDefaults.minDailyGoal
+    let maximumDailyGoal: Int = AppDefaults.maxDailyGoal
 
-    func incrementVocab() {
-        numberVocab = min(maxVocab, numberVocab + 1)
+    func incrementDailyGoal() {
+        dailyGoalCount = min(maximumDailyGoal, dailyGoalCount + 1)
     }
 
-    func decrementVocab() {
-        numberVocab = max(minVocab, numberVocab - 1)
+    func decrementDailyGoal() {
+        dailyGoalCount = max(minimumDailyGoal, dailyGoalCount - 1)
     }
 
-    func complete(onComplete: (String, Int, String) -> Void) {
+    func complete(onComplete: (_ name: String, _ dailyGoal: Int, _ interest: String) -> Void) {
         let finalName = AppDefaults.sanitizedName(name)
-        onComplete(finalName, max(minVocab, numberVocab), selectedInterest)
+        onComplete(finalName, max(minimumDailyGoal, dailyGoalCount), selectedInterest)
     }
 }

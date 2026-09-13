@@ -101,13 +101,13 @@ struct PersonalizedSpeakingPracticeView: View {
                 viewModel.startRecording()
             } label: {
                 Image.microphone
-                    .font(viewModel.microphoneIsSecondary ? .title2Bold : .largeTitleBold)
-                    .frame(width: viewModel.microphoneIsSecondary ? 68 : 100, height: viewModel.microphoneIsSecondary ? 68 : 100)
-                    .background(viewModel.microphoneIsSecondary ? Color.white : Color.brandPrimary)
+                    .font(viewModel.isCurrentStepPassed ? .title2Bold : .largeTitleBold)
+                    .frame(width: viewModel.isCurrentStepPassed ? 68 : 100, height: viewModel.isCurrentStepPassed ? 68 : 100)
+                    .background(viewModel.isCurrentStepPassed ? Color.white : Color.brandPrimary)
                     .clipShape(Circle())
-                    .foregroundStyle(viewModel.microphoneIsSecondary ? Color.brandPrimary : Color.white)
+                    .foregroundStyle(viewModel.isCurrentStepPassed ? Color.brandPrimary : Color.white)
                     .overlay {
-                        if viewModel.microphoneIsSecondary {
+                        if viewModel.isCurrentStepPassed {
                             Circle().stroke(Color.brandPrimary.opacity(0.18), lineWidth: 1)
                         }
                     }
@@ -135,10 +135,10 @@ struct PersonalizedSpeakingPracticeView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Spacing.md)
-                    .background(viewModel.microphoneIsSecondary ? Color.brandPrimary : Color.white)
-                    .foregroundStyle(viewModel.microphoneIsSecondary ? Color.white : Color.brandPrimary)
+                    .background(viewModel.isCurrentStepPassed ? Color.brandPrimary : Color.white)
+                    .foregroundStyle(viewModel.isCurrentStepPassed ? Color.white : Color.brandPrimary)
                     .overlay {
-                        if !viewModel.microphoneIsSecondary {
+                        if !viewModel.isCurrentStepPassed {
                             Capsule().stroke(Color.brandPrimary.opacity(0.25), lineWidth: 1)
                         }
                     }

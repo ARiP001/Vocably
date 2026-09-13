@@ -8,10 +8,11 @@
 import SwiftUI
 import SwiftData
 
-struct SettingView: View {
+/// Screen for editing user profile, domain of interest, and daily vocabulary goal.
+struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @State private var viewModel = SettingViewModel()
+    @State private var viewModel = SettingsViewModel()
     
     var body: some View {
         NavigationStack {
@@ -122,6 +123,9 @@ struct SettingView: View {
     }
 }
 
+/// Backward compatibility alias for SettingsView.
+typealias SettingView = SettingsView
+
 #Preview {
-    SettingView()
+    SettingsView()
 }

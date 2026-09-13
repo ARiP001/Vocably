@@ -153,8 +153,7 @@ struct MissionHomeView: View {
                         selectedDomain: selectedDomain
                     ) {
                         viewModel.completeMission(
-                            word: vocab.word,
-                            wordID: vocab.id,
+                            for: vocab,
                             selectedDomain: selectedDomain,
                             session: &session
                         )

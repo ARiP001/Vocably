@@ -12,12 +12,25 @@ struct RecommendedVocabulary: Codable, Identifiable {
     let word: String
     let cefrLevel: String
     let partOfSpeech: String
-    let subtlwf: Double?
+    /// SUBTLEX word frequency per million words (higher values indicate more frequent spoken usage).
+    let subtlexFrequency: Double?
     let frequencyRank: Int?
     let normalizedRank: Double
     let domain: [String]
     let pronunciation: RecommendedPronunciation?
     let definitions: [RecommendedDefinitionGroup]
+
+    enum CodingKeys: String, CodingKey {
+        case word
+        case cefrLevel
+        case partOfSpeech
+        case subtlexFrequency = "subtlwf"
+        case frequencyRank
+        case normalizedRank
+        case domain
+        case pronunciation
+        case definitions
+    }
 
     var id: String { word }
 

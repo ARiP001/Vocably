@@ -35,14 +35,14 @@ final class MissionHomeViewModel {
         recommendNext(excluding: vocab.id, selectedDomain: selectedDomain, session: session)
     }
 
+    /// Marks the given vocabulary mission as completed in the session and advances recommendation.
     func completeMission(
-        word: String,
-        wordID: String,
+        for vocabulary: RecommendedVocabulary,
         selectedDomain: String,
         session: inout LearningSession
     ) {
-        session.finishLearning(named: word)
-        recommendNext(excluding: wordID, selectedDomain: selectedDomain, session: session)
+        session.finishLearning(named: vocabulary.word)
+        recommendNext(excluding: vocabulary.id, selectedDomain: selectedDomain, session: session)
     }
 
     func resetForDomain(selectedDomain: String, session: LearningSession) {

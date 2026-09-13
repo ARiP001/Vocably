@@ -39,10 +39,11 @@ final class SpeakingPracticeViewModel {
     var currentPrompt: String { prompts[currentStep] }
     var hasRecordedCurrentStep: Bool { recordingURLs[currentStep] != nil }
 
-    var microphoneIsSecondary: Bool {
+    /// Whether the learner has successfully passed the current speaking step with a high pronunciation score.
+    var isCurrentStepPassed: Bool {
         guard hasRecordedCurrentStep,
               !isChecking,
-              let score = results[currentStep].percentage,
+              let score = results[currentStep].overallScore,
               score >= 85 else {
             return false
         }
@@ -104,10 +105,10 @@ final class SpeakingPracticeViewModel {
     }
 
     func scoreLabel(for result: PronunciationResult) -> String {
-        guard let percentage = result.percentage else {
+        guard let score = result.overallScore else {
             return result.score.title
         }
-        return "\(result.score.title) · PronScore: \(Int(percentage.rounded()))/100"
+        return "\(result.score.title) · PronScore: \(Int(score.rounded()))/100"
     }
 
     func evaluatedWords(prompt: String, result: PronunciationResult) -> [EvaluatedWord] {
@@ -125,17 +126,17 @@ final class SpeakingPracticeViewModel {
         if result.words.indices.contains(index) {
             return EvaluatedWord(word: promptWord, accuracy: WordAccuracy(score: result.words[index].score))
         }
-        guard let percentage = result.percentage else {
+        guard let score = result.overallScore else {
             return EvaluatedWord(word: promptWord, accuracy: .unassessed)
         }
-        let accuracy = matchAccuracyFromRecognizedText(word: promptWord, result: result, percentage: percentage)
+        let accuracy = matchAccuracyFromRecognizedText(word: promptWord, result: result, score: score)
         return EvaluatedWord(word: promptWord, accuracy: accuracy)
     }
 
     private func matchAccuracyFromRecognizedText(
         word promptWord: String,
         result: PronunciationResult,
-        percentage: Double
+        score: Double
     ) -> WordAccuracy {
         let normalizedPromptWord = promptWord.lowercased().filter(\.isLetter)
         let recognizedWords = result.recognizedText
@@ -143,7 +144,7 @@ final class SpeakingPracticeViewModel {
             .map { $0.lowercased() }
 
         return recognizedWords.contains(normalizedPromptWord)
-            ? WordAccuracy(score: percentage)
+            ? WordAccuracy(score: score)
             : .poor
     }
 
