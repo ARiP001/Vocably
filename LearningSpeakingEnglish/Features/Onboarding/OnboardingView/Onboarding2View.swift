@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Screen for selecting daily vocabulary learning goal during onboarding.
+/// Layar untuk menentukan target harian pembelajaran kosakata selama orientasi (onboarding).
 struct OnboardingGoalView: View {
     let viewModel: OnboardingViewModel
     var onComplete: (_ name: String, _ dailyGoal: Int, _ interest: String) -> Void
@@ -66,7 +66,7 @@ struct OnboardingGoalView: View {
     }
 }
 
-/// Backward compatibility alias for OnboardingGoalView.
+/// Alias kompatibilitas ke belakang untuk OnboardingGoalView.
 typealias Onboarding2View = OnboardingGoalView
 
 #Preview {

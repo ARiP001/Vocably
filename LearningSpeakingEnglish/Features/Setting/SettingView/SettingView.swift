@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-/// Screen for editing user profile, domain of interest, and daily vocabulary goal.
+/// Layar untuk mengedit profil pengguna, bidang minat, dan target harian kosakata.
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -123,7 +123,7 @@ struct SettingsView: View {
     }
 }
 
-/// Backward compatibility alias for SettingsView.
+/// Alias kompatibilitas ke belakang untuk SettingsView.
 typealias SettingView = SettingsView
 
 #Preview {

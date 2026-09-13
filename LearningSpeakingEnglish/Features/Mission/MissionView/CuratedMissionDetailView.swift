@@ -6,7 +6,7 @@
 import SwiftUI
 import SwiftData
 
-/// Three-card, personalized learning view used by the JSON/Foundation Model POC.
+/// Tampilan belajar terpersonalisasi 3-kartu yang didukung oleh Foundation Model dan data kamus.
 struct CuratedMissionDetailView: View {
     let vocabulary: RecommendedVocabulary
     let selectedDomain: String

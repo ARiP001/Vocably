@@ -99,7 +99,7 @@ private struct AzureWordResult: Decodable {
     }
 }
 
-/// Sends 16 kHz PCM WAV recordings to Azure Speech Pronunciation Assessment.
+/// Mengirimkan rekaman WAV Linear PCM 16 kHz ke Azure Speech Pronunciation Assessment REST API.
 struct PronunciationService {
     let endpoint: URL
     let apiKey: String

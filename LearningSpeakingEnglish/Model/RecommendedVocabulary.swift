@@ -7,12 +7,12 @@
 
 import Foundation
 
-/// The bundled dictionary record used by the recommendation and mission POC.
+/// Data kosakata kamus bawaan yang digunakan untuk sistem rekomendasi dan misi belajar.
 struct RecommendedVocabulary: Codable, Identifiable {
     let word: String
     let cefrLevel: String
     let partOfSpeech: String
-    /// SUBTLEX word frequency per million words (higher values indicate more frequent spoken usage).
+    /// Frekuensi kata SUBTLEX per satu juta kata (nilai lebih tinggi menandakan kata lebih sering digunakan dalam percakapan lisan).
     let subtlexFrequency: Double?
     let frequencyRank: Int?
     let normalizedRank: Double

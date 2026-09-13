@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A lightweight three-step speaking exercise for a personalized POC mission.
+/// Tampilan latihan berbicara 3-langkah untuk misi yang dipersonalisasi.
 struct PersonalizedSpeakingPracticeView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: SpeakingPracticeViewModel

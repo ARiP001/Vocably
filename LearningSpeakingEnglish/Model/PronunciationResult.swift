@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Discrete score buckets used across pronunciation feedback.
+/// Kategori tingkatan skor pengucapan yang digunakan untuk umpan balik latihan.
 enum PronunciationScore {
     case perfect
     case almost
@@ -28,7 +28,7 @@ enum PronunciationScore {
     }
 }
 
-/// Evaluation tier for an individual word in a practice prompt.
+/// Tingkatan akurasi untuk penilaian kata individual dalam kalimat latihan.
 enum WordAccuracy {
     case unassessed
     case accurate
@@ -47,24 +47,24 @@ enum WordAccuracy {
     }
 }
 
-/// An evaluated word token ready for presentation rendering.
+/// Token kata yang telah dievaluasi untuk ditampilkan pada antarmuka pengguna.
 struct EvaluatedWord: Identifiable {
     let id = UUID()
     let word: String
     let accuracy: WordAccuracy
 }
 
-/// Overall speech recognition transcript and score assessment.
+/// Hasil transkrip pengenalan suara dan penilaian skor keseluruhan.
 struct PronunciationResult {
     var recognizedText: String = ""
     var score: PronunciationScore = .unrecognized
-    /// Overall Azure HundredMark score (0...100).
+    /// Skor keseluruhan Azure HundredMark (0...100).
     var overallScore: Double?
-    /// Scores returned for each recognized word, in spoken order.
+    /// Daftar skor yang dihasilkan untuk setiap kata, sesuai urutan pelafalan.
     var words: [PronunciationWordResult] = []
 }
 
-/// Individual word pronunciation assessment.
+/// Penilaian pengucapan untuk kata individual.
 struct PronunciationWordResult: Identifiable {
     let id = UUID()
     let word: String

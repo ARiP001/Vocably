@@ -25,7 +25,7 @@ enum AudioServiceError: LocalizedError {
     }
 }
 
-/// Consolidated service for microphone recording and audio playback.
+/// Layanan terpadu untuk perekaman mikrofon dan pemutaran audio pengguna.
 enum AudioService {
     private static var player: AVAudioPlayer?
     private static var currentRecorder: AVAudioRecorder?
@@ -34,7 +34,7 @@ enum AudioService {
 
     // MARK: - Microphone & Recording
 
-    /// Requests microphone access and returns the result on main thread.
+    /// Meminta izin akses mikrofon dan mengembalikan hasilnya di main thread.
     static func requestMicrophonePermission(_ completion: @escaping (Bool) -> Void) {
         AVAudioApplication.requestRecordPermission { granted in
             DispatchQueue.main.async {
@@ -43,7 +43,7 @@ enum AudioService {
         }
     }
 
-    /// Starts a recording session with an automated duration tick timer.
+    /// Memulai sesi perekaman dengan timer durasi otomatis.
     static func startRecording(
         onTick: @escaping (Int) -> Void,
         completion: @escaping (Result<Void, AudioServiceError>) -> Void
@@ -73,7 +73,7 @@ enum AudioService {
         }
     }
 
-    /// Stops the active recording session and returns the recorded audio file URL.
+    /// Menghentikan sesi perekaman aktif dan mengembalikan URL file audio yang terekam.
     static func stopRecording() -> URL? {
         stopTickTimer()
         guard let recorder = currentRecorder else { return nil }
@@ -83,9 +83,9 @@ enum AudioService {
         return url
     }
 
-    // MARK: - Recording Helpers
+    // MARK: - Helper Perekaman
 
-    /// Creates a 16 kHz mono PCM WAV recorder for pronunciation assessment.
+    /// Membuat recorder WAV Linear PCM 16 kHz mono untuk penilaian pengucapan Azure.
     private static func makeRecorder(fileName: String) throws -> AVAudioRecorder {
         let fileURL = try recordingFileURL(fileName: fileName)
         let settings = pcm16kHzSettings()
@@ -108,6 +108,8 @@ enum AudioService {
     }
 
     private static func pcm16kHzSettings() -> [String: Any] {
+        // REST API Azure Speech Pronunciation Assessment secara ketat mewajibkan sample rate 16 kHz,
+        // Linear PCM 16-bit, dan channel mono. Audio terkompresi (seperti AAC) akan ditolak dengan error HTTP 400.
         [
             AVFormatIDKey: Int(kAudioFormatLinearPCM),
             AVSampleRateKey: 16_000,
@@ -142,9 +144,9 @@ enum AudioService {
         recordingTimer = nil
     }
 
-    // MARK: - Playback
+    // MARK: - Pemutaran Audio
 
-    /// Plays audio from a local file URL.
+    /// Memutar audio dari URL file lokal.
     static func play(url: URL) {
         do {
             try configurePlaybackSession()
@@ -152,7 +154,7 @@ enum AudioService {
             player?.prepareToPlay()
             player?.play()
         } catch {
-            // Keep app responsive if playback fails.
+            // Menjaga aplikasi tetap responsif jika terjadi kegagalan pemutaran audio.
         }
     }
 
@@ -162,7 +164,7 @@ enum AudioService {
         try session.setActive(true)
     }
 
-    /// Stops currently playing audio if active.
+    /// Menghentikan pemutaran audio jika sedang aktif.
     static func stopPlayback() {
         player?.stop()
         player = nil

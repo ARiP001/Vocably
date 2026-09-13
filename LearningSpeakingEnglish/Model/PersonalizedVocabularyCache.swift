@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-/// SwiftData cache for content generated from the bundled dictionary record.
+/// Cache SwiftData untuk menyimpan hasil personalisasi konten AI dari kosakata kamus.
 @Model
 final class PersonalizedVocabularyCache {
     var cacheKey: String
@@ -44,7 +44,7 @@ final class PersonalizedVocabularyCache {
     }
 }
 
-/// DTO representing serialized translation data in cache storage.
+/// Objek data transfer (DTO) untuk serialisasi terjemahan bahasa Indonesia di penyimpanan cache.
 struct CachedIndonesianTranslation: Codable {
     let word: String
     let partOfSpeech: String

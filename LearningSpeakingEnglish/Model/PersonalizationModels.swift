@@ -8,7 +8,7 @@
 import Foundation
 import FoundationModels
 
-/// The curated content shown by the three-card mission screen.
+/// Konten terkurasi yang ditampilkan pada layar detail misi 3-kartu.
 struct PersonalizedVocabularyContent {
     let vocabulary: RecommendedVocabulary
     let definitions: [RecommendedDefinition]

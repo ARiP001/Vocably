@@ -6,7 +6,7 @@
 import Foundation
 import SwiftData
 
-/// Service managing SwiftData persistence and cache retrieval for personalized vocabulary content.
+/// Layanan yang mengelola persistensi SwiftData dan pengambilan cache untuk konten kosakata yang telah dipersonalisasi.
 enum PersonalizationCacheService {
     static let promptVersion = "mission-poc-v1"
     static let modelVersion = "foundation-model-default"
@@ -15,7 +15,7 @@ enum PersonalizationCacheService {
         "\(vocabulary.word.lowercased())|\(domain.lowercased())|\(promptVersion)|\(modelVersion)"
     }
 
-    /// Looks up cached personalized content matching the vocabulary word and domain.
+    /// Mencari konten terpersonalisasi di dalam cache yang cocok dengan kata dan domain pengguna.
     static func findContent(
         for vocabulary: RecommendedVocabulary,
         domain: String,

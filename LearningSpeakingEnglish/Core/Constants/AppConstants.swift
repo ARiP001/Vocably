@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Centralized default configuration values and domain metadata for the application.
+/// Nilai konfigurasi bawaan terpusat dan metadata domain untuk aplikasi.
 enum AppDefaults {
     static let fallbackLearnerName = "Learner"
     static let defaultInterest = "General"
@@ -25,14 +25,14 @@ enum AppDefaults {
         "Creative"
     ]
 
-    /// Sanitizes user-entered name, trimming whitespace and newlines with fallback to default learner title.
+    /// Membersihkan spasi dan baris baru pada nama input pengguna, dengan fallback ke sebutan pembelajar default.
     static func sanitizedName(_ rawName: String) -> String {
         let cleaned = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
         return cleaned.isEmpty ? fallbackLearnerName : cleaned
     }
 }
 
-/// Standardized UserDefaults storage keys used across the app.
+/// Kunci penyimpanan standar UserDefaults yang digunakan di seluruh aplikasi.
 enum SettingsKey {
     static let hasCompletedOnboarding = "hasCompletedOnboarding"
     static let userName = "userName"

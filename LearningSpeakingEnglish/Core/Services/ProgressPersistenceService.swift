@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+/// Layanan untuk menyinkronkan dan memulihkan kemajuan sesi belajar pengguna ke penyimpanan SwiftData.
 enum ProgressPersistenceService {
     static func resolveStore(
         from stores: [LearningProgressStore],

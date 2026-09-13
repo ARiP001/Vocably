@@ -8,7 +8,7 @@
 import SwiftUI
 import Observation
 
-/// ViewModel managing user profile settings, interest selection, and daily goal preferences.
+/// ViewModel yang mengelola pengaturan profil pengguna, pemilihan minat, dan preferensi target harian.
 @Observable
 final class SettingsViewModel {
     var draftName = ""
@@ -92,5 +92,5 @@ final class SettingsViewModel {
     }
 }
 
-/// Backward compatibility alias for SettingsViewModel.
+/// Alias kompatibilitas ke belakang untuk SettingsViewModel.
 typealias SettingViewModel = SettingsViewModel

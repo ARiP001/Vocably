@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// Screen displaying searchable and ranked vocabulary list.
+/// Layar yang menampilkan daftar kosakata yang dapat dicari dan diperingkatkan.
 struct VocabListView: View {
     @Binding var session: LearningSession
     let selectedDomain: String
@@ -76,7 +76,7 @@ struct VocabListView: View {
     }
 }
 
-/// Backward compatibility alias for VocabListView.
+/// Alias kompatibilitas ke belakang untuk VocabListView.
 typealias ListView = VocabListView
 
 #Preview {

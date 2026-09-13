@@ -6,14 +6,12 @@
 import Foundation
 import SwiftData
 
-/// Persistent store for user learning progress across app launches.
+/// Penyimpanan persisten untuk riwayat dan kemajuan belajar pengguna antar sesi aplikasi.
 @Model
 final class LearningProgressStore {
-    /// Fixed key so we only keep one progress record.
+    /// Kunci tetap untuk memastikan hanya ada satu data kemajuan tunggal (singleton) di container aplikasi.
     var singletonKey: String
-    /// Vocabulary names marked as learned.
     var learnedVocabNames: [String]
-    /// Name of vocab currently selected in mission flow.
     var currentVocabName: String
 
     init(

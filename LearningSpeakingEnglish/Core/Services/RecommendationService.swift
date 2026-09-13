@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Service responsible for scoring and ranking vocabulary based on domain relevance and frequency.
+/// Layanan untuk menghitung skor dan memperingkat kosakata berdasarkan relevansi domain minat serta frekuensi penggunaan.
 enum RecommendationService {
     static func rank(
         vocabulary: [RecommendedVocabulary],
@@ -26,6 +26,8 @@ enum RecommendationService {
     }
 
     private static func domainScore(for word: RecommendedVocabulary, domain: String) -> Double {
+        // Kosakata umum tanpa domain spesifik diberi bobot netral (0.5)
+        // agar kata-kata dasar tetap dapat ditemukan saat kata khusus domain telah habis dipelajari.
         if word.domain.isEmpty {
             return 0.5
         }
@@ -36,6 +38,8 @@ enum RecommendationService {
     }
 
     private static func compositeScore(normalizedRank: Double, domainScore: Double) -> Double {
+        // Berikan bobot lebih tinggi pada relevansi domain (60%) dibanding frekuensi korpus (40%)
+        // agar misi terasa terpersonalisasi dengan minat pengguna namun tetap menggunakan kata yang lazim.
         (normalizedRank * 0.4) + (domainScore * 0.6)
     }
 }

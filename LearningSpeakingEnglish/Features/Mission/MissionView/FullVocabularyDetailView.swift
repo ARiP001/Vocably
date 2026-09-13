@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// Full, uncurated dictionary reference exposed from the mission's See More action.
+/// Referensi kamus lengkap tanpa kurasi yang ditampilkan dari aksi "See More" pada detail misi.
 struct FullVocabularyDetailView: View {
     let vocabulary: RecommendedVocabulary
 

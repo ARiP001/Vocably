@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Lightweight vocabulary representation used by LearningSession.
+/// Representasi kosakata ringan yang digunakan dalam LearningSession.
 struct Vocab: Identifiable {
     let id: UUID = UUID()
     let word: String
@@ -19,7 +19,7 @@ extension Vocab {
     }
 }
 
-/// Runtime session state that powers mission progress and daily goals.
+/// State runtime sesi belajar yang mengelola progres misi dan target harian.
 struct LearningSession {
     var dailyGoal: Int
     var vocabList: [Vocab] = []
@@ -27,29 +27,27 @@ struct LearningSession {
     var currentIndex: Int = 0
     var learnedVocabIDs: [UUID] = []
 
-    /// Set of lowercase vocabulary names that have been marked as learned.
     var learnedWordNames: Set<String> {
         let learnedSet = Set(learnedVocabIDs)
         return Set(vocabList.filter { learnedSet.contains($0.id) }.map { $0.word.lowercased() })
     }
 
-    /// Checks whether a given vocabulary word has already been learned.
     func isLearned(word: String) -> Bool {
         learnedWordNames.contains(word.lowercased())
     }
 
-    /// Safe daily target, clamped to available vocab count.
+    /// Target harian yang aman, dibatasi oleh jumlah kosakata yang tersedia.
     var dailyTargetCount: Int {
         guard !vocabList.isEmpty else { return 0 }
         return min(max(1, dailyGoal), vocabList.count)
     }
 
-    /// Completed items limited by current daily target.
+    /// Jumlah kata yang telah diselesaikan hari ini, dibatasi oleh target harian saat ini.
     var completedToday: Int {
         min(learnedVocabIDs.count, dailyTargetCount)
     }
 
-    /// 0...1 progress value for progress bars.
+    /// Nilai progres 0...1 untuk tampilan progress bar.
     var progressValue: Double {
         guard dailyTargetCount > 0 else { return 0 }
         return Double(completedToday) / Double(dailyTargetCount)
@@ -59,13 +57,13 @@ struct LearningSession {
         "\(completedToday)/\(dailyTargetCount)"
     }
 
-    /// Currently active vocab from the session index.
+    /// Kosakata aktif saat ini berdasarkan indeks sesi.
     var currentVocab: Vocab? {
         guard currentIndex >= 0, currentIndex < vocabList.count else { return nil }
         return vocabList[currentIndex]
     }
 
-    /// Marks current vocab as learned and advances to next unlearned vocab.
+    /// Menandai kosakata saat ini sebagai telah dipelajari dan berpindah ke kosakata berikutnya.
     mutating func finishCurrentLearning() {
         guard currentIndex >= 0, currentIndex < vocabList.count else { return }
         let currentID = vocabList[currentIndex].id
@@ -77,7 +75,7 @@ struct LearningSession {
         moveToNextUnlearnedVocab()
     }
 
-    /// Marks a vocabulary item learned by word name.
+    /// Menandai kosakata sebagai telah dipelajari berdasarkan nama kata.
     mutating func finishLearning(named name: String) {
         guard let index = vocabList.firstIndex(where: { $0.word.caseInsensitiveCompare(name) == .orderedSame }) else {
             return
@@ -87,7 +85,7 @@ struct LearningSession {
         finishCurrentLearning()
     }
 
-    /// Finds the next vocab that is not learned yet.
+    /// Menemukan dan berpindah ke kosakata berikutnya yang belum dipelajari.
     mutating func moveToNextUnlearnedVocab() {
         guard !vocabList.isEmpty else { return }
 

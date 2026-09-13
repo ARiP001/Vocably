@@ -5,11 +5,11 @@
 
 import AVFoundation
 
-/// Handles text-to-speech playback for vocab and sentence prompts.
+/// Menangani pemutaran suara text-to-speech (TTS) untuk kosakata dan kalimat latihan.
 enum SpeechService {
     private static let synthesizer = AVSpeechSynthesizer()
 
-    /// Speaks input text using the requested language voice.
+    /// Melafalkan teks menggunakan suara bahasa yang diminta.
     static func speak(_ text: String, languageCode: String = "en-US") {
         let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if cleanText.isEmpty {
@@ -21,9 +21,9 @@ enum SpeechService {
             try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
             try session.setActive(true)
         } catch {
-            // Keep the app flow smooth even when audio session setup fails.
+            // Menjaga alur aplikasi tetap lancar jika inisialisasi audio session gagal.
         }
-        // Stop current utterance so the newest tap response is immediate.
+        // Hentikan pelafalan yang sedang aktif agar respons ketukan tombol terbaru terdengar seketika.
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
         }
@@ -35,7 +35,7 @@ enum SpeechService {
         synthesizer.speak(utterance)
     }
 
-    /// Stops speaking immediately if speech synthesis is currently active.
+    /// Menghentikan pelafalan seketika jika sintesis ucapan sedang aktif.
     static func stop() {
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)

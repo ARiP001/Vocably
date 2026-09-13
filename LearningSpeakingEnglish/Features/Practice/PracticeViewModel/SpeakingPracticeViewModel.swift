@@ -39,14 +39,17 @@ final class SpeakingPracticeViewModel {
     var currentPrompt: String { prompts[currentStep] }
     var hasRecordedCurrentStep: Bool { recordingURLs[currentStep] != nil }
 
-    /// Whether the learner has successfully passed the current speaking step with a high pronunciation score.
+    /// Menandakan apakah pembelajar telah berhasil menyelesaikan langkah latihan berbicara saat ini dengan skor pengucapan yang tinggi.
     var isCurrentStepPassed: Bool {
+        // Skor keseluruhan >= 85 selaras dengan standar patokan Azure Speech untuk kategori pengucapan "Great".
         guard hasRecordedCurrentStep,
               !isChecking,
               let score = results[currentStep].overallScore,
               score >= 85 else {
             return false
         }
+        // Setiap kata individual disyaratkan memenuhi akurasi yang dapat diterima (>= 80)
+        // agar nilai rata-rata yang tinggi tidak menyamarkan kata yang salah diucapkan atau terlewat.
         return results[currentStep].words.allSatisfy { $0.score >= 80 }
     }
 

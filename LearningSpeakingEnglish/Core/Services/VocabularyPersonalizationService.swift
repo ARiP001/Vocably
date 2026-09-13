@@ -7,7 +7,7 @@ import Foundation
 import SwiftData
 import FoundationModels
 
-/// Runs the on-device Foundation Model personalization pipeline and returns fallback content if unavailable.
+/// Menjalankan alur personalisasi Foundation Model on-device dan mengembalikan konten fallback jika model tidak tersedia.
 @MainActor
 enum VocabularyPersonalizationService {
     private static var inFlight: [String: Task<PersonalizationResult, Never>] = [:]
@@ -17,7 +17,7 @@ enum VocabularyPersonalizationService {
         SystemLanguageModel.default.isAvailable
     }
 
-    /// Prefetches upcoming vocabulary items into SwiftData cache in the background.
+    /// Melakukan prefetch kosakata berikutnya ke cache SwiftData di latar belakang.
     static func prefetch(
         words: [RecommendedVocabulary],
         domain: String,
@@ -31,6 +31,8 @@ enum VocabularyPersonalizationService {
             cachedKeys.contains(PersonalizationCacheService.key(for: $0, domain: domain))
         }.count
 
+        // Batasi prefetch latar belakang maksimal 5 kata agar tidak membebani komputasi Neural Engine on-device,
+        // alokasi memori, serta konsumsi baterai saat pengguna sedang aktif menjelajahi misi.
         guard cachedCount < 5 else { return }
 
         var preparedKeys = cachedKeys

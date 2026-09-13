@@ -35,7 +35,7 @@ final class MissionHomeViewModel {
         recommendNext(excluding: vocab.id, selectedDomain: selectedDomain, session: session)
     }
 
-    /// Marks the given vocabulary mission as completed in the session and advances recommendation.
+    /// Menandai misi kosakata telah selesai dipelajari dalam sesi dan memajukan rekomendasi berikutnya.
     func completeMission(
         for vocabulary: RecommendedVocabulary,
         selectedDomain: String,

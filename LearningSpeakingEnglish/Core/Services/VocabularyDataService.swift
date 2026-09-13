@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Errors that can occur when loading bundled vocabulary definitions.
+/// Jenis error yang dapat terjadi saat memuat data kosakata bawaan.
 enum VocabularyDataError: LocalizedError {
     case fileNotFound
     case decodingFailed(Error)
@@ -13,16 +13,16 @@ enum VocabularyDataError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .fileNotFound:
-            return "Vocabulary resource file 'vocabulary.json' was not found in the application bundle."
+            return "File sumber kosakata 'vocabulary.json' tidak ditemukan di dalam bundle aplikasi."
         case .decodingFailed(let underlyingError):
-            return "Failed to decode 'vocabulary.json': \(underlyingError.localizedDescription)"
+            return "Gagal melakukan decode pada 'vocabulary.json': \(underlyingError.localizedDescription)"
         }
     }
 }
 
-/// Service responsible for loading bundled vocabulary definitions.
+/// Layanan yang bertanggung jawab memuat data definisi kosakata bawaan aplikasi.
 enum VocabularyDataService {
-    /// Loads bundled vocabulary definitions, returning a typed Result.
+    /// Memuat definisi kosakata bawaan dan mengembalikan Result bertipe.
     static func loadVocabulary() -> Result<[RecommendedVocabulary], VocabularyDataError> {
         guard let url = Bundle.main.url(forResource: "vocabulary", withExtension: "json") else {
             return .failure(.fileNotFound)
@@ -37,18 +37,22 @@ enum VocabularyDataService {
         }
     }
 
-    /// Loads bundled vocabulary definitions. In DEBUG mode, reports failures explicitly via assertion.
+    /// Memuat definisi kosakata bawaan. Dalam mode DEBUG, melaporkan kegagalan secara eksplisit melalui assertion.
     static func load() -> [RecommendedVocabulary] {
         switch loadVocabulary() {
         case .success(let vocabularies):
             return vocabularies
         case .failure(let error):
+            // Fail-fast saat tahap pengembangan agar file bundle yang hilang atau ketidaksesuaian skema JSON
+            // langsung terdeteksi seketika, namun tetap mengembalikan array kosong saat produksi agar aplikasi tidak crash.
+            #if DEBUG
             assertionFailure("VocabularyDataService failed to load vocabulary: \(error.localizedDescription)")
+            #endif
             return []
         }
     }
 
-    /// Creates an in-memory session populated from bundled vocabulary data.
+    /// Membuat sesi belajar di memori yang diisi dari data kosakata bawaan.
     @MainActor
     static func createSession(dailyGoal: Int, interest: String = "General") -> LearningSession {
         let vocabulary = load().map(Vocab.init(recommendedVocabulary:))

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Screen for setting up user profile and interest area during onboarding.
+/// Layar untuk mengonfigurasi profil pengguna dan bidang minat selama orientasi (onboarding).
 struct OnboardingProfileView: View {
     var onComplete: (_ name: String, _ dailyGoal: Int, _ interest: String) -> Void
     @State private var viewModel = OnboardingViewModel()
@@ -87,7 +87,7 @@ struct OnboardingProfileView: View {
     }
 }
 
-/// Backward compatibility alias for OnboardingProfileView.
+/// Alias kompatibilitas ke belakang untuk OnboardingProfileView.
 typealias Onboarding1View = OnboardingProfileView
 
 #Preview {

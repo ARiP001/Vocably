@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// Renders evaluated words with their respective accuracy feedback colors.
+/// Menampilkan teks kata-kata yang telah dievaluasi dengan warna umpan balik akurasi masing-masing.
 struct EvaluatedPromptText: View {
     let evaluatedWords: [EvaluatedWord]
 
